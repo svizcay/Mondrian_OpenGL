@@ -126,16 +126,8 @@ int main( void )
 	// glm::mat4 translateM = glm::translate(glm::mat4(1.0f), glm::vec3(1,1,1));
 
 	// glm::mat4 Model      = glm::mat4(1.0f);
-	glm::mat4 Model = rectangles[0].getModel();
-	for (unsigned i = 0; i < 4; i++) {
-		for (unsigned j = 0; j < 4; j++) {
-			std::cout << Model[i][j] << " ";
-		}
-		std::cout << std::endl;
-	}
 	// glm::mat4 Model      = translateM * rotateM * scaleM;
 	// Our ModelViewProjection : multiplication of our 3 matrices
-	glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
 	static const GLfloat g_vertex_buffer_data[] = { 
 		-1.0f, -1.0f, 0.0f,	// 1st triangle
@@ -188,10 +180,13 @@ int main( void )
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, rectangles.size()*2*3); // 3 indices starting at 0 -> 1 triangle
+		for (unsigned i = 0; i < rectangles.size(); i++) {
+			glm::mat4 Model = rectangles[0].getModel();
+			glm::mat4 MVP        = Projection * View * Model;
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+			// Draw 1 rectangle (2 triangles, 3 vertices each)
+			glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
+		}
 
 		// Swap buffers
 		glfwSwapBuffers(window);
