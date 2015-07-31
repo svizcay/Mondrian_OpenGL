@@ -1,6 +1,8 @@
 #include "rectangle.hpp"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <cstdlib>
+#include <ctime>
 
 const float Rectangle::surfaceSize = 1;
 unsigned Rectangle::counter = 0;
@@ -9,7 +11,7 @@ Rectangle::Rectangle()
 {
 	id = counter;
 	proportion = glm::vec2(5, 1);			// set it random
-	color = glm::vec4(0, 1, 0, 1);			// set it random among fixed values
+	color = getRandomColor();			// set it random among fixed values
 
 	position = glm::vec4(0, 0, 0, 1);
 
@@ -84,4 +86,15 @@ glm::mat4 Rectangle::getModel()
 {
 	return modelMatrix;
 
+}
+
+glm::vec4 Rectangle::getRandomColor()
+{
+	std::srand(std::time(0));
+	float red = std::rand() * 1.0 / RAND_MAX;
+	float green = std::rand() * 1.0 / RAND_MAX;
+	float blue = std::rand() * 1.0 / RAND_MAX;
+	glm::vec4 color (red, green, blue, 1);
+	std::cout << color.x << " " << color.y << " " << color.z << std::endl;
+	return color;
 }

@@ -29,6 +29,8 @@ private:
 	glm::vec4 vertexc;
 	glm::vec4 vertexd;
 
+	glm::vec4 getRandomColor();
+
 public:
 	Rectangle();
 
