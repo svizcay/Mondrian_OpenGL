@@ -8,15 +8,16 @@ unsigned Rectangle::counter = 0;
 Rectangle::Rectangle()
 {
 	id = counter;
-	proportion = glm::vec2(3, 5);			// set it random
+	proportion = glm::vec2(5, 1);			// set it random
 	color = glm::vec4(0, 1, 0, 1);			// set it random among fixed values
 
 	position = glm::vec4(0, 0, 0, 1);
 
 	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
-	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(1, 0, 0));
+	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 0, 1));
 	translationMatrix = glm::translate(glm::mat4(1), glm::vec3(-10, 0, 0));
-	modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	// modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	modelMatrix = translationMatrix * rotationMatrix * scaleMatrix * glm::mat4(1);
 
 	isPinned = false;
 	isDead = false;
@@ -79,7 +80,7 @@ void Rectangle::getColorComponents(float * colorComponents)
 	}
 }
 
-glm::mat4 Rectangle::getMode()
+glm::mat4 Rectangle::getModel()
 {
 	return modelMatrix;
 

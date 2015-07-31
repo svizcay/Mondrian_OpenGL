@@ -58,17 +58,6 @@ int main( void )
 			coordCounter++;
 		}
 	}
-	// std::cout << "coord counter: " << coordCounter << std::endl;
-	unsigned counter = 0;
-	for (unsigned i = 0; i < rectangles.size(); i++) {
-		for (unsigned j = 0; j < 2 * 3; j++) {
-			for (unsigned k = 0; k < 4; k++) {
-				std::cout << cpuBufferColors[counter] << " ";
-				counter++;
-			}
-			std::cout << std::endl;
-		}
-	}
 
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -125,7 +114,7 @@ int main( void )
 	
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
-								glm::vec3(0,0,1), // Camera is at (4,3,3), in World Space
+								glm::vec3(0,0,10), // Camera is at (4,3,3), in World Space
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 						   );
@@ -136,7 +125,14 @@ int main( void )
 	// glm::mat4 rotateM = glm::rotate(glm::mat4(1.0f), 90.0f, rotationAxis);
 	// glm::mat4 translateM = glm::translate(glm::mat4(1.0f), glm::vec3(1,1,1));
 
-	glm::mat4 Model      = glm::mat4(1.0f);
+	// glm::mat4 Model      = glm::mat4(1.0f);
+	glm::mat4 Model = rectangles[0].getModel();
+	for (unsigned i = 0; i < 4; i++) {
+		for (unsigned j = 0; j < 4; j++) {
+			std::cout << Model[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
 	// glm::mat4 Model      = translateM * rotateM * scaleM;
 	// Our ModelViewProjection : multiplication of our 3 matrices
 	glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
@@ -191,6 +187,8 @@ int main( void )
 
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
+
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 		// Draw the triangle !
 		glDrawArrays(GL_TRIANGLES, 0, rectangles.size()*2*3); // 3 indices starting at 0 -> 1 triangle

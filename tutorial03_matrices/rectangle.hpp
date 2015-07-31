@@ -34,7 +34,7 @@ public:
 
 	void getCoords(float * coords);
 	void getColorComponents(float * colorComponents);
-	glm::mat4 getMode();
+	glm::mat4 getModel();
 
 };
 
