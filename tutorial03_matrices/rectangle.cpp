@@ -2,23 +2,34 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
-const float Rectangle::surfaceSize = 100;
+const float Rectangle::surfaceSize = 1;
 unsigned Rectangle::counter = 0;
 
 Rectangle::Rectangle()
 {
 	id = counter;
-	proportion = glm::vec2(4, 2);
-	color = glm::vec4(0, 1, 0, 1);
+	proportion = glm::vec2(3, 5);			// set it random
+	color = glm::vec4(0, 1, 0, 1);			// set it random among fixed values
+
 	position = glm::vec4(0, 0, 0, 1);
-	translationMatrix = glm::translate(glm::mat4(1), glm::vec3(1, 0, 0));
+
+	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
+	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(1, 0, 0));
+	translationMatrix = glm::translate(glm::mat4(1), glm::vec3(-10, 0, 0));
+	modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
 	isPinned = false;
 	isDead = false;
 	counter++;
 
-	// rectangle's vertices
-	// float scaleFactor = .5;
-	float scaleFactor = 2.0 / surfaceSize;
+	// rectangle's vertices (object space) [-1:1]
+	float ratio = proportion.x / proportion.y;
+	float scaleFactor = 0;
+	if (ratio > 1) {
+		scaleFactor = 2 / proportion.x;
+	} else {
+		scaleFactor = 2 / proportion.y;
+	}
 	float halfx = proportion.x / 2.0;
 	float halfy = proportion.y / 2.0;
 	float scaledHalfx = scaleFactor * halfx;
@@ -66,4 +77,10 @@ void Rectangle::getColorComponents(float * colorComponents)
 		// if (i % 4 == 0) std::cout << std::endl;
 		// std::cout << colorComponents[i] << " ";
 	}
+}
+
+glm::mat4 Rectangle::getMode()
+{
+	return modelMatrix;
+
 }
