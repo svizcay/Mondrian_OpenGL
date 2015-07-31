@@ -1,0 +1,15 @@
+#version 330 core
+
+in vec4 inputColor;
+
+// Ouput data
+out vec4 color;
+
+void main()
+{
+
+	// Output color = green 
+	color = inputColor;
+	// color = vec4(1, 0, 0, 1);
+
+}
