@@ -51,14 +51,24 @@ int main( void )
 	for (unsigned i = 0; i < rectangles.size(); i++) {
 		rectangles[i].getColorComponents(rectangleColorComponents);
 		for (unsigned j = 0; j < 2*3*4; j++) {
-			if (j % 4 == 0) std::cout << std::endl;
+			// if (j % 4 == 0) std::cout << std::endl;
 			cpuBufferColors[coordCounter] = rectangleColorComponents[j];
-			std::cout << cpuBufferColors[coordCounter] << " ";
+			// std::cout << cpuBufferColors[coordCounter] << " ";
 			// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
 			coordCounter++;
 		}
 	}
 	// std::cout << "coord counter: " << coordCounter << std::endl;
+	unsigned counter = 0;
+	for (unsigned i = 0; i < rectangles.size(); i++) {
+		for (unsigned j = 0; j < 2 * 3; j++) {
+			for (unsigned k = 0; k < 4; k++) {
+				std::cout << cpuBufferColors[counter] << " ";
+				counter++;
+			}
+			std::cout << std::endl;
+		}
+	}
 
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -195,9 +205,11 @@ int main( void )
 
 
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &colorBuffer);
 	glDeleteProgram(programID);
 	glDeleteVertexArrays(1, &VertexArrayID);
 
