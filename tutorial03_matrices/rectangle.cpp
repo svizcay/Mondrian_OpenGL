@@ -90,7 +90,6 @@ glm::mat4 Rectangle::getModel()
 
 glm::vec4 Rectangle::getRandomColor()
 {
-	std::srand(std::time(0));
 	float red = std::rand() * 1.0 / RAND_MAX;
 	float green = std::rand() * 1.0 / RAND_MAX;
 	float blue = std::rand() * 1.0 / RAND_MAX;

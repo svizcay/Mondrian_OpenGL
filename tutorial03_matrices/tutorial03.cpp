@@ -19,9 +19,13 @@ using namespace glm;
 #include "rectangle.hpp"
 #include <vector>
 #include <iostream>
+#include <ctime>
 
 int main( void )
 {
+
+	// init random seed equal to current time
+	std::srand(std::time(0));
 
 	Rectangle rectangle;
 	std::vector<Rectangle> rectangles;
