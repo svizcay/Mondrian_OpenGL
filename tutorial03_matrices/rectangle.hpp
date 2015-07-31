@@ -30,6 +30,7 @@ private:
 	glm::vec4 vertexd;
 
 	glm::vec4 getRandomColor();
+	glm::vec2 getRandomProportion();
 
 public:
 	Rectangle();

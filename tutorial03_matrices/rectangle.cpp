@@ -10,7 +10,7 @@ unsigned Rectangle::counter = 0;
 Rectangle::Rectangle()
 {
 	id = counter;
-	proportion = glm::vec2(5, 1);			// set it random
+	proportion = getRandomProportion();	// set it random
 	color = getRandomColor();			// set it random among fixed values
 
 	position = glm::vec4(0, 0, 0, 1);
@@ -96,4 +96,13 @@ glm::vec4 Rectangle::getRandomColor()
 	glm::vec4 color (red, green, blue, 1);
 	std::cout << color.x << " " << color.y << " " << color.z << std::endl;
 	return color;
+}
+
+// random proportion sizes between 1 and 10
+glm::vec2 Rectangle::getRandomProportion()
+{
+	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
+	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
+	glm::vec2 proportion (x, y);
+	return proportion;
 }
