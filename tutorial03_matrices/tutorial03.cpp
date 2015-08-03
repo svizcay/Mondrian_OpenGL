@@ -15,12 +15,15 @@ GLFWwindow* window;
 using namespace glm;
 
 #include <common/shader.hpp>
+#include <common/controls.hpp>
 
 #include "rectangle.hpp"
 #include <vector>
 #include <iostream>
 #include <ctime>
 #include <unistd.h>	// usleep()
+
+void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 
 int main( void )
 {
@@ -53,7 +56,7 @@ int main( void )
 
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
-	window = glfwCreateWindow( 500, 500, "Tutorial 03 - Matrices", NULL, NULL);
+	window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -70,6 +73,7 @@ int main( void )
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 	// Dark blue background
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -89,14 +93,15 @@ int main( void )
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
+	//glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
 	// glm::mat4 Projection = glm::ortho(30.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Or, for an ortho camera :
-	//glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
+	// left, right, bottom, top, angle1, angle2
+	glm::mat4 Projection = glm::ortho(-10.0f * 0.4f, 10.0f * 0.4f, -10.0f * 0.3f, 10.0f * 0.3f, 1.0f, 100.0f); // In world coordinates
 	
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
-								glm::vec3(0,0,10), // Camera is at (4,3,3), in World Space
+								glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 						   );
@@ -212,7 +217,7 @@ int main( void )
 				// Draw 1 rectangle (2 triangles, 3 vertices each)
 				glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
 			} else {
-				// std::cout << "rectangle " << i << " is dead" << std::endl;
+				std::cout << "rectangle " << i << " is dead" << std::endl;
 			}
 		}
 
@@ -254,3 +259,11 @@ int main( void )
 	return 0;
 }
 
+void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+		std::cout << "click on: " << xpos << " " << ypos << std::endl;
+	}
+}

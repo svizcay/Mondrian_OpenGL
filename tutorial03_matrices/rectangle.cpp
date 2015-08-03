@@ -127,8 +127,8 @@ glm::vec2 Rectangle::getRandomProportion()
 	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
 	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
 	// TODO: change this lines
-	glm::vec2 proportion (x, y);
-	// glm::vec2 proportion (1, 1);
+	// glm::vec2 proportion (x, y);
+	glm::vec2 proportion (1, 1);
 	return proportion;
 }
 
