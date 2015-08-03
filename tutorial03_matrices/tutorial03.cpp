@@ -20,6 +20,7 @@ using namespace glm;
 #include <vector>
 #include <iostream>
 #include <ctime>
+#include <unistd.h>	// usleep()
 
 int main( void )
 {
@@ -28,8 +29,10 @@ int main( void )
 	std::srand(std::time(0));
 
 	Rectangle rectangle;
+	Rectangle rectangle2;
 	std::vector<Rectangle> rectangles;
 	rectangles.push_back(rectangle);
+	rectangles.push_back(rectangle2);
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
 	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
 	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
@@ -76,7 +79,8 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
+	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
+	window = glfwCreateWindow( 500, 500, "Tutorial 03 - Matrices", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -111,7 +115,8 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
 	// glm::mat4 Projection = glm::ortho(30.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Or, for an ortho camera :
 	//glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
@@ -185,8 +190,10 @@ int main( void )
 		glClear( GL_COLOR_BUFFER_BIT );
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
-			glm::mat4 Model = rectangles[0].getModel();
-			glm::mat4 MVP        = Projection * View * Model;
+			rectangles[i].updateModel();
+			glm::mat4 Model = rectangles[i].getModel();
+			glm::mat4 MVP = Projection * View * Model;
+			// glm::mat4 MVP = Model;
 			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 			// Draw 1 rectangle (2 triangles, 3 vertices each)
 			glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
@@ -195,6 +202,7 @@ int main( void )
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		usleep(100000);
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&

@@ -11,7 +11,7 @@ out vec4 fragmentColor;
 void main(){
 
 	// Output position of the vertex, in clip space : MVP * position
-	// gl_Position =  MVP * vertexPosition_modelspace;
+	// gl_Position =  vertexPosition_modelspace;
 	gl_Position =  MVP * vertexPosition_modelspace;
 	fragmentColor = inputColor;
 }

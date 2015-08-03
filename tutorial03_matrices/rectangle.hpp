@@ -14,6 +14,7 @@ private:
 
 	// translate * rotate * scale * original_value
 	glm::vec4 position;				// ? maybe not required
+	unsigned spawningSite;			// 0:left; 1:botton; 2:right; 3:top
 	glm::mat4 translationMatrix;
 	glm::mat4 rotationMatrix;
 	glm::mat4 scaleMatrix;
@@ -31,13 +32,14 @@ private:
 
 	glm::vec4 getRandomColor();
 	glm::vec2 getRandomProportion();
-
+	glm::mat4 getInitialPosition();
 public:
 	Rectangle();
 
 	void getCoords(float * coords);
 	void getColorComponents(float * colorComponents);
 	glm::mat4 getModel();
+	void updateModel();
 
 };
 

@@ -15,11 +15,13 @@ Rectangle::Rectangle()
 
 	position = glm::vec4(0, 0, 0, 1);
 
-	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
+	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(0.5, 0.5, 1));
 	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 0, 1));
-	translationMatrix = glm::translate(glm::mat4(1), glm::vec3(-10, 0, 0));
+	translationMatrix = getInitialPosition();
 	// modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	// TODO change next lines
 	modelMatrix = translationMatrix * rotationMatrix * scaleMatrix * glm::mat4(1);
+	// modelMatrix = translationMatrix * glm::mat4(1);
 
 	isPinned = false;
 	isDead = false;
@@ -88,13 +90,34 @@ glm::mat4 Rectangle::getModel()
 
 }
 
+void Rectangle::updateModel()
+{
+	switch (spawningSite) {
+		case 0:	// from left to right
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(1, 0, 0));
+			break;
+		case 1:	// from bottom to top
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
+			break;
+		case 2: // from right to left
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(-1, 0, 0));
+			break;
+		case 3:	// from top to bottom
+			modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -1, 0));
+			break;
+		default:
+			std::cerr << "ERROR: wrong value" << std::endl;
+
+	}
+}
+
 glm::vec4 Rectangle::getRandomColor()
 {
 	float red = std::rand() * 1.0 / RAND_MAX;
 	float green = std::rand() * 1.0 / RAND_MAX;
 	float blue = std::rand() * 1.0 / RAND_MAX;
 	glm::vec4 color (red, green, blue, 1);
-	std::cout << color.x << " " << color.y << " " << color.z << std::endl;
+	// std::cout << color.x << " " << color.y << " " << color.z << std::endl;
 	return color;
 }
 
@@ -103,6 +126,29 @@ glm::vec2 Rectangle::getRandomProportion()
 {
 	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
 	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
+	// TODO: change this lines
 	glm::vec2 proportion (x, y);
+	// glm::vec2 proportion (1, 1);
 	return proportion;
+}
+
+glm::mat4 Rectangle::getInitialPosition()
+{
+	spawningSite = (std::rand() * 1.0 / RAND_MAX) * 4;
+	int spawningSite2ndComponent = (std::rand() * 1.0 / RAND_MAX) * 20 - 10;
+	std::cout << "spawningSite: " << spawningSite << std::endl;
+	std::cout << "spawningSite2ndComponent: " << spawningSite2ndComponent << std::endl;
+	switch (spawningSite) {
+		case 0:	// left
+			return glm::translate(glm::mat4(1), glm::vec3(-10, spawningSite2ndComponent, 0));
+		case 1:	// bottom
+			return glm::translate(glm::mat4(1), glm::vec3(spawningSite2ndComponent, -10, 0));
+		case 2:	// right
+			return glm::translate(glm::mat4(1), glm::vec3(10, spawningSite2ndComponent, 0));
+		case 3:	// top
+			return glm::translate(glm::mat4(1), glm::vec3(spawningSite2ndComponent, 10, 0));
+		default:
+			std::cerr << "ERROR: wrong value" << std::endl;
+			return glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+	}
 }
