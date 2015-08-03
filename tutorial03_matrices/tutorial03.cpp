@@ -234,7 +234,7 @@ int main( void )
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		// usleep(500000);
-		usleep(100000);
+		// usleep(100000);
 
 		simulationTime++;
 

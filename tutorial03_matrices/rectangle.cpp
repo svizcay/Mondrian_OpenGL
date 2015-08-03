@@ -100,9 +100,9 @@ void Rectangle::updateModel()
 	previousTime = currentTime;
 	currentTime = glfwGetTime();
 	// double deltaTime = currentTime - previousTime;
-	double deltaTime = 1;
+	double deltaTime = 0.1;
 	// std::cout << "delta time: " << deltaTime << std::endl;
-	double speed = 1;
+	double speed = 10;
 	if (!isPinned) {
 		switch (spawningSite) {
 			case 0:	// from left to right
