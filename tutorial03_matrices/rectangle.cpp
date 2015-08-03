@@ -1,5 +1,6 @@
 #include "rectangle.hpp"
 #include <iostream>
+#include <glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstdlib>
 #include <ctime>
@@ -15,7 +16,7 @@ Rectangle::Rectangle()
 
 	position = glm::vec4(0, 0, 0, 1);
 
-	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(0.5, 0.5, 1));
+	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
 	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 0, 1));
 	translationMatrix = getInitialPosition();
 	// modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
@@ -25,6 +26,10 @@ Rectangle::Rectangle()
 
 	isPinned = false;
 	isDead = false;
+
+	previousTime = 0;
+	currentTime = 0;
+
 	counter++;
 
 	// rectangle's vertices (object space) [-1:1]
@@ -92,22 +97,30 @@ glm::mat4 Rectangle::getModel()
 
 void Rectangle::updateModel()
 {
-	switch (spawningSite) {
-		case 0:	// from left to right
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(1, 0, 0));
-			break;
-		case 1:	// from bottom to top
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0, 1, 0));
-			break;
-		case 2: // from right to left
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(-1, 0, 0));
-			break;
-		case 3:	// from top to bottom
-			modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -1, 0));
-			break;
-		default:
-			std::cerr << "ERROR: wrong value" << std::endl;
+	previousTime = currentTime;
+	currentTime = glfwGetTime();
+	// double deltaTime = currentTime - previousTime;
+	double deltaTime = 1;
+	// std::cout << "delta time: " << deltaTime << std::endl;
+	double speed = 1;
+	if (!isPinned) {
+		switch (spawningSite) {
+			case 0:	// from left to right
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(speed * deltaTime, 0, 0));
+				break;
+			case 1:	// from bottom to top
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, speed * deltaTime, 0));
+				break;
+			case 2: // from right to left
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(-speed * deltaTime, 0, 0));
+				break;
+			case 3:	// from top to bottom
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -speed * deltaTime, 0));
+				break;
+			default:
+				std::cerr << "ERROR: wrong value" << std::endl;
 
+		}
 	}
 }
 
@@ -127,8 +140,8 @@ glm::vec2 Rectangle::getRandomProportion()
 	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
 	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
 	// TODO: change this lines
-	// glm::vec2 proportion (x, y);
-	glm::vec2 proportion (1, 1);
+	glm::vec2 proportion (x, y);
+	// glm::vec2 proportion (1, 1);
 	return proportion;
 }
 
@@ -199,4 +212,68 @@ bool Rectangle::isAlive()
 {
 	return !isDead;
 
+}
+
+bool Rectangle::isInside(double x, double y)
+{
+	// current coordinates
+	glm::vec4 currentA = modelMatrix * vertexa;
+	glm::vec4 currentB = modelMatrix * vertexb;
+	glm::vec4 currentC = modelMatrix * vertexc;
+	glm::vec4 currentD = modelMatrix * vertexd;
+
+	// (x,y) should be inside [left, right] and [bottom, top]
+	double left, right;
+	double bottom, top;
+
+	// L1 vertical line CA
+	if (currentA.x == currentC.x) {
+		left = currentA.x;
+	} else {
+		double m1 = (currentC.y - currentA.y) / (currentC.x - currentA.x);
+		left = (y - currentA.y) / m1 + currentA.x;
+	}
+
+	// L2 verticak line DB
+	if (currentD.x == currentB.x) {
+		right = currentD.x;
+	} else {
+		double m2 = (currentD.y - currentB.y) / (currentD.x - currentB.x);
+		right = (y - currentB.y) / m2 + currentB.x;
+	}
+
+	// L3 horizontal line AB
+	// TODO check for case A.x and B.x are equal
+	if (currentA.y == currentB.y) {
+		top = currentA.y;
+	} else {
+		double m3 = (currentB.y - currentA.y) / (currentB.x - currentA.x);
+		top = m3 * (x - currentA.x) + currentA.y;
+	}
+
+	// L4 horizontal line CD
+	// TODO check for case C.x and D.x are equal
+	if (currentC.y == currentD.y) {
+		bottom = currentC.y;
+	} else {
+		double m4 = (currentD.y - currentC.y) / (currentD.x - currentC.x);
+		bottom = m4 * (x - currentC.x) + currentC.y;
+	}
+
+	if (x >= left && x <= right && y >= bottom && y <= top) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void Rectangle::checkPinned(double x, double y)
+{
+	if (!isPinned) {
+		// check if (x,y) is inside rectangle ABCD
+		if (isInside(x, y)) {
+			isPinned = true;
+			std::cout << "pinned!" << std::endl;
+		}
+	}
 }

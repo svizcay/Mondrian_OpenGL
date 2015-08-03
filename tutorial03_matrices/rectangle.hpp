@@ -33,6 +33,11 @@ private:
 	glm::vec4 getRandomColor();
 	glm::vec2 getRandomProportion();
 	glm::mat4 getInitialPosition();
+	bool isInside(double x, double y);
+
+	// timers
+	double previousTime;
+	double currentTime;
 public:
 	Rectangle();
 
@@ -42,6 +47,7 @@ public:
 	void updateModel();
 	bool shouldBeAlive();
 	bool isAlive();
+	void checkPinned(double x, double y);
 
 };
 

@@ -25,6 +25,8 @@ using namespace glm;
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 
+std::vector<Rectangle> rectangles;
+
 int main( void )
 {
 
@@ -33,7 +35,6 @@ int main( void )
 
 	Rectangle rectangle;
 	Rectangle rectangle2;
-	std::vector<Rectangle> rectangles;
 	// rectangles.push_back(rectangle);
 	// rectangles.push_back(rectangle2);
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
@@ -56,7 +57,7 @@ int main( void )
 
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
-	window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
+	window = glfwCreateWindow( 600, 600, "Tutorial 03 - Matrices", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -97,7 +98,7 @@ int main( void )
 	// glm::mat4 Projection = glm::ortho(30.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Or, for an ortho camera :
 	// left, right, bottom, top, angle1, angle2
-	glm::mat4 Projection = glm::ortho(-10.0f * 0.4f, 10.0f * 0.4f, -10.0f * 0.3f, 10.0f * 0.3f, 1.0f, 100.0f); // In world coordinates
+	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
 	
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
@@ -217,7 +218,7 @@ int main( void )
 				// Draw 1 rectangle (2 triangles, 3 vertices each)
 				glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
 			} else {
-				std::cout << "rectangle " << i << " is dead" << std::endl;
+				// std::cout << "rectangle " << i << " is dead" << std::endl;
 			}
 		}
 
@@ -232,6 +233,7 @@ int main( void )
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		// usleep(500000);
 		usleep(100000);
 
 		simulationTime++;
@@ -261,9 +263,43 @@ int main( void )
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 {
+	int windowWidth;
+	int windowHeight;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
-		std::cout << "click on: " << xpos << " " << ypos << std::endl;
+		// std::cout << "click on: " << xpos << " " << ypos << std::endl;
+		glfwGetWindowSize(window, &windowWidth, &windowHeight);
+		// std::cout << "window's size: " << windowWidth << " " << windowHeight << std::endl;
+		double normalizedX = xpos * 1.0 / windowWidth;
+		double normalizedY = ypos * 1.0 / windowHeight;
+		double modelCoordX;
+		double modelCoordY;
+		// std::cout << "click on (normalized): " << normalizedX << " " << normalizedY << std::endl;
+		// TODO: change hardcoded value 10
+		if (normalizedX > 0.5) {
+			// positive X
+			modelCoordX = normalizedX * 20 - 10;
+		} else {
+			// negative X
+			modelCoordX = normalizedX * 20 - 10;
+		}
+
+		if (normalizedY > 0.5) {
+			// negative Y
+			modelCoordY = normalizedY * 20;
+			modelCoordY = -(modelCoordY - 10);
+		} else {
+			// positive Y
+			modelCoordY = normalizedY * 20;
+			modelCoordY = (10 - modelCoordY);
+		}
+
+		// std::cout << "(" << modelCoordX << "," << modelCoordY << ")" << std::endl;
+		// usleep(3000000);
+
+		for (unsigned i = 0; i < rectangles.size(); i++) {
+			rectangles[i].checkPinned(modelCoordX, modelCoordY);
+		}
 	}
 }
