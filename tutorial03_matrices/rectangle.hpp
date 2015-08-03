@@ -41,6 +41,7 @@ public:
 	glm::mat4 getModel();
 	void updateModel();
 	bool shouldBeAlive();
+	bool isAlive();
 
 };
 

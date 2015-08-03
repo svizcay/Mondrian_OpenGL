@@ -136,8 +136,8 @@ glm::mat4 Rectangle::getInitialPosition()
 {
 	spawningSite = (std::rand() * 1.0 / RAND_MAX) * 4;
 	int spawningSite2ndComponent = (std::rand() * 1.0 / RAND_MAX) * 20 - 10;
-	std::cout << "spawningSite: " << spawningSite << std::endl;
-	std::cout << "spawningSite2ndComponent: " << spawningSite2ndComponent << std::endl;
+	// std::cout << "spawningSite: " << spawningSite << std::endl;
+	// std::cout << "spawningSite2ndComponent: " << spawningSite2ndComponent << std::endl;
 	switch (spawningSite) {
 		case 0:	// left
 			return glm::translate(glm::mat4(1), glm::vec3(-10, spawningSite2ndComponent, 0));
@@ -193,4 +193,10 @@ bool Rectangle::shouldBeAlive()
 			std::cerr << "ERROR: wrong value" << std::endl;
 			return false;
 	}
+}
+
+bool Rectangle::isAlive()
+{
+	return !isDead;
+
 }
