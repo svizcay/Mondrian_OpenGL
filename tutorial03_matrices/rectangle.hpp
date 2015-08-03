@@ -40,6 +40,7 @@ public:
 	void getColorComponents(float * colorComponents);
 	glm::mat4 getModel();
 	void updateModel();
+	bool shouldBeAlive();
 
 };
 

@@ -152,3 +152,45 @@ glm::mat4 Rectangle::getInitialPosition()
 			return glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
 	}
 }
+
+bool Rectangle::shouldBeAlive()
+{
+	// new coordinates
+	glm::vec4 newA = modelMatrix * vertexa;
+	glm::vec4 newB = modelMatrix * vertexb;
+	glm::vec4 newC = modelMatrix * vertexc;
+	glm::vec4 newD = modelMatrix * vertexd;
+	switch (spawningSite) {
+		case 0:	// from left to right (check for A and C)
+			if (newA.x >= 10 || newC.x >= 10) {
+				isDead = true;
+				return false;
+			} else {
+				return true;
+			}
+		case 1:	// from bottom to top (check for C and D)
+			if (newC.y >= 10 || newD.y >= 10) {
+				isDead = true;
+				return false;
+			} else {
+				return true;
+			}
+		case 2:	// from right to left (check for B and D)
+			if (newB.x <= -10 || newD.x <= -10) {
+				isDead = true;
+				return false;
+			} else {
+				return true;
+			}
+		case 3:	// from top to bottom (check for A and B)
+			if (newA.y <= -10 || newB.y <= -10) {
+				isDead = true;
+				return false;
+			} else {
+				return true;
+			}
+		default:
+			std::cerr << "ERROR: wrong value" << std::endl;
+			return false;
+	}
+}

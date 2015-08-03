@@ -99,7 +99,7 @@ int main( void )
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -191,12 +191,16 @@ int main( void )
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			rectangles[i].updateModel();
-			glm::mat4 Model = rectangles[i].getModel();
-			glm::mat4 MVP = Projection * View * Model;
-			// glm::mat4 MVP = Model;
-			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-			// Draw 1 rectangle (2 triangles, 3 vertices each)
-			glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
+			if (rectangles[i].shouldBeAlive()) {
+				glm::mat4 Model = rectangles[i].getModel();
+				glm::mat4 MVP = Projection * View * Model;
+				// glm::mat4 MVP = Model;
+				glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+				// Draw 1 rectangle (2 triangles, 3 vertices each)
+				glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
+			} else {
+				std::cout << "rectangle " << i << " is dead" << std::endl;
+			}
 		}
 
 		// Swap buffers
