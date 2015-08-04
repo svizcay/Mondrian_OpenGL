@@ -7,6 +7,8 @@
 
 const float Rectangle::surfaceSize = 1;
 unsigned Rectangle::counter = 0;
+// double Rectangle::previousTime = 0;
+// double Rectangle::currentTime = 0;
 
 Rectangle::Rectangle()
 {
@@ -28,7 +30,7 @@ Rectangle::Rectangle()
 	isDead = false;
 
 	previousTime = 0;
-	currentTime = 0;
+	currentTime = glfwGetTime();
 
 	counter++;
 
@@ -99,9 +101,9 @@ void Rectangle::updateModel()
 {
 	previousTime = currentTime;
 	currentTime = glfwGetTime();
-	// double deltaTime = currentTime - previousTime;
-	double deltaTime = 0.1;
-	// std::cout << "delta time: " << deltaTime << std::endl;
+	double deltaTime = currentTime - previousTime;
+	// double deltaTime = 0.1;
+	// std::cout << "ID: " << id << " delta time: " << deltaTime << " [" << previousTime << " : " << currentTime << "]" << std::endl;
 	double speed = 10;
 	if (!isPinned) {
 		switch (spawningSite) {

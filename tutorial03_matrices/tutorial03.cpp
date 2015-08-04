@@ -24,6 +24,7 @@ using namespace glm;
 #include <unistd.h>	// usleep()
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
+bool endSimulation = false;
 
 std::vector<Rectangle> rectangles;
 
@@ -33,8 +34,8 @@ int main( void )
 	// init random seed equal to current time
 	std::srand(std::time(0));
 
-	Rectangle rectangle;
-	Rectangle rectangle2;
+	// Rectangle rectangle;
+	// Rectangle rectangle2;
 	// rectangles.push_back(rectangle);
 	// rectangles.push_back(rectangle2);
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
@@ -88,6 +89,35 @@ int main( void )
 
 	// Use our shader
 	glUseProgram(programID);
+
+	/*
+	// basic mesh: a rectangle
+	const float meshVertices[] = {
+		-0.5f, 0.5f, 0.0f,
+		0.5f, 0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f
+	};
+
+	// buffer for the vertices of the mesh
+	GLuint meshVerticesBuffer;
+	glGenBuffers(1, &meshVerticesBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, meshVerticesBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(meshVertices), meshVertices, GL_STATIC_DRAW);
+
+	// buffer for position and size of every particle
+	const unsigned MAX_NR_PARTICLES = 100;
+	GLuint particlePositionsBuffer;
+	glGenBuffers(1, &particlePositionsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, particlePositionsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, MAX_NR_PARTICLES * 4 * sizeof(float), NULL, GL_STREAM_DRAW);
+
+	// buffer for color of every particle
+	GLuint particleColorsBuffer;
+	glGenBuffers(1, &particleColorsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, particleColorsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, MAX_NR_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
+	*/
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -160,55 +190,56 @@ int main( void )
 		glClear( GL_COLOR_BUFFER_BIT );
 
 		// every 5 steps, create a new rectangle
-		if (simulationTime % 5 == 0) {
+		if (simulationTime % 75 == 0 && !endSimulation) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
 			rectangles.push_back(rectangle);
-
-			// update cpu buffers
-			delete [] cpuBufferDataPoints;
-			delete [] cpuBufferColors;
-			cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
-			cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
-			// fill up new cpu position buffers
-
-			float rectangleCoords[2 * 3 * 4];
-			unsigned coordCounter = 0;
-			for (unsigned i = 0; i < rectangles.size(); i++) {
-				rectangles[i].getCoords(rectangleCoords);
-				for (unsigned j = 0; j < 2*3*4; j++) {
-					cpuBufferDataPoints[coordCounter] = rectangleCoords[j];
-					// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
-					coordCounter++;
-				}
-			}
-
-			// fill up new cpu colors buffers
-			float rectangleColorComponents[2 * 3 * 4];
-			coordCounter = 0;
-			for (unsigned i = 0; i < rectangles.size(); i++) {
-				rectangles[i].getColorComponents(rectangleColorComponents);
-				for (unsigned j = 0; j < 2*3*4; j++) {
-					// if (j % 4 == 0) std::cout << std::endl;
-					cpuBufferColors[coordCounter] = rectangleColorComponents[j];
-					// std::cout << cpuBufferColors[coordCounter] << " ";
-					// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
-					coordCounter++;
-				}
-			}
-
-			// TODO: check if i have to enable those attrib with a bound buffer
-
-			// transfer data to position and color buffers
-			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STATIC_DRAW);
-
-			glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STATIC_DRAW);
 		}
 
+		// update cpu buffers
+		delete [] cpuBufferDataPoints;
+		delete [] cpuBufferColors;
+		cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
+		cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
+		// fill up new cpu position buffers
+
+		float rectangleCoords[2 * 3 * 4];
+		unsigned coordCounter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
+			rectangles[i].getCoords(rectangleCoords);
+			for (unsigned j = 0; j < 2*3*4; j++) {
+				cpuBufferDataPoints[coordCounter] = rectangleCoords[j];
+				// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
+				coordCounter++;
+			}
+		}
+
+		// fill up new cpu colors buffers
+		float rectangleColorComponents[2 * 3 * 4];
+		coordCounter = 0;
+		for (unsigned i = 0; i < rectangles.size(); i++) {
+			rectangles[i].getColorComponents(rectangleColorComponents);
+			for (unsigned j = 0; j < 2*3*4; j++) {
+				// if (j % 4 == 0) std::cout << std::endl;
+				cpuBufferColors[coordCounter] = rectangleColorComponents[j];
+				// std::cout << cpuBufferColors[coordCounter] << " ";
+				// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
+				coordCounter++;
+			}
+		}
+
+		// TODO: check if i have to enable those attrib with a bound buffer
+
+		// transfer data to position and color buffers
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
+
+		for (unsigned i = 0; i < rectangles.size(); i++) {
+			// std::cout << "updating rectangle id: " << i << std::endl;
 			rectangles[i].updateModel();
 			if (rectangles[i].shouldBeAlive()) {
 				glm::mat4 Model = rectangles[i].getModel();
@@ -301,5 +332,10 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			rectangles[i].checkPinned(modelCoordX, modelCoordY);
 		}
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+		endSimulation = true;
+		std::cout << "right click" << std::endl;
 	}
 }
