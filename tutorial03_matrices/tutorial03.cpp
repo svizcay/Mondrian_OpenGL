@@ -144,9 +144,11 @@ int main( void )
 
 	std::set<int> verticalLines;
 	std::set<int> horizontalLines;
+	unsigned nrLines = 0;
 
 	bool justEnded = true;
 	float *cpuBufferLines;
+	float *cpuBufferColorLines;
 	
 	do{
 
@@ -202,11 +204,19 @@ int main( void )
 		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints);
+		if (endSimulation && !justEnded) {
+			// std::cout << "transfering lines data points...." << std::endl;
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferLines);
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
+		if (endSimulation && !justEnded) {
+			// std::cout << "transfering lines color points...." << std::endl;
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferColorLines);
+		}
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			// std::cout << "updating rectangle id: " << i << std::endl;
@@ -223,6 +233,13 @@ int main( void )
 			}
 		}
 
+		if (endSimulation && !justEnded) {
+			// std::cout << "drawing lines..." << std::endl;
+			glm::mat4 MVP = glm::mat4(1.0f);
+			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+			glDrawArrays(GL_LINES, rectangles.size()*2*3, nrLines * 2); // 3 indices starting at 0 -> 1 triangle
+		}
+
 		for (std::vector<Rectangle>::iterator it = rectangles.begin(); it != rectangles.end();) {
 			if (it->isAlive()) {
 				it++;
@@ -232,7 +249,9 @@ int main( void )
 		}
 
 		if (endSimulation) {
+			// load data in cpuBufferLines just the very first time
 			if (justEnded) {
+				std::cout << "creating lines..." << std::endl;
 				justEnded = false;
 
 				// get vertical and horizontal coords of every line that should be drawn
@@ -249,26 +268,49 @@ int main( void )
 
 				unsigned nrVerticalLines = verticalLines.size();
 				unsigned nrHorizontalLines = horizontalLines.size();
-				unsigned nrLines = nrVerticalLines + nrHorizontalLines;
-				// 1 line 2 points each; 1 point 2 coord each
-				cpuBufferLines = new float[nrLines * 4];
+				nrLines = nrVerticalLines + nrHorizontalLines;
+				std::cout << "nr lines to draw: " << nrLines << std::endl;
+				// 1 line = 2 points each; 1 point = 4 coord each;
+				cpuBufferLines = new float[nrLines * 2 * 4];
+				cpuBufferColorLines = new float[nrLines * 2 * 4];
 				unsigned counter = 0;
 				for (std::set<int>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
-					cpuBufferLines[counter++] = *it;
-					cpuBufferLines[counter++] = 10;
-					cpuBufferLines[counter++] = *it;
-					cpuBufferLines[counter++] = -10;
+					// first point
+					cpuBufferLines[counter++] = *it;	// x
+					cpuBufferLines[counter++] = 10;		// y
+					cpuBufferLines[counter++] = 0;		// z
+					cpuBufferLines[counter++] = 1;		// w
+					// second point
+					cpuBufferLines[counter++] = *it;	// x
+					cpuBufferLines[counter++] = -10;	// y
+					cpuBufferLines[counter++] = 0;		// z
+					cpuBufferLines[counter++] = 1;		// w
+					std::cout << "first line: " << std::endl;
+					std::cout << "(" << *it << "," << 10 << "," << 0 << "," << 1 << ")" << std::endl;
+					std::cout << "(" << *it << "," << -10 << "," << 0 << "," << 1 << ")" << std::endl;
 				}
 
 				for (std::set<int>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
-					cpuBufferLines[counter++] = -10;
-					cpuBufferLines[counter++] = *it;
-					cpuBufferLines[counter++] = 10;
-					cpuBufferLines[counter++] = *it;
+					// first point
+					cpuBufferLines[counter++] = -10;	// x
+					cpuBufferLines[counter++] = *it;	// y
+					cpuBufferLines[counter++] = 0;		// z
+					cpuBufferLines[counter++] = 1;		// w
+					// second point
+					cpuBufferLines[counter++] = 10;		// x
+					cpuBufferLines[counter++] = *it;	// y
+					cpuBufferLines[counter++] = 0;		// z
+					cpuBufferLines[counter++] = 1;		// w
+				}
+
+				counter = 0;
+				for (unsigned i = 0; i < nrLines; i++) {
+					cpuBufferColorLines[counter++] = 0.5;	// r
+					cpuBufferColorLines[counter++] = 0,5;	// g
+					cpuBufferColorLines[counter++] = 0.5;	// b
+					cpuBufferColorLines[counter++] = 1;	// a
 				}
 			}
-
-			// glUseProgram(programID2);
 		}
 
 		// Swap buffers
@@ -298,7 +340,7 @@ int main( void )
 
 	delete [] cpuBufferDataPoints;
 	delete [] cpuBufferColors;
-	delete [] cpuBufferLines;
+	delete [] cpuBufferLines;		// make sure new was executed, i.e: right click event
 
 	return 0;
 }
