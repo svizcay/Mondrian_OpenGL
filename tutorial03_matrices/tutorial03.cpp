@@ -19,6 +19,7 @@ using namespace glm;
 
 #include "rectangle.hpp"
 #include <vector>
+#include <set>
 #include <iostream>
 #include <ctime>
 #include <unistd.h>	// usleep()
@@ -34,15 +35,9 @@ int main( void )
 	// init random seed equal to current time
 	std::srand(std::time(0));
 
-	// Rectangle rectangle;
-	// Rectangle rectangle2;
-	// rectangles.push_back(rectangle);
-	// rectangles.push_back(rectangle2);
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
 	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
 	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
-	// float *cpuBufferDataPoints;
-	// float *cpuBufferColors;
 
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -58,7 +53,7 @@ int main( void )
 
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
-	window = glfwCreateWindow( 600, 600, "Tutorial 03 - Matrices", NULL, NULL);
+	window = glfwCreateWindow( 600, 600, "Mondrian", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -77,9 +72,10 @@ int main( void )
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-	// Dark blue background
+	// white background
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
+	// VAO
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
@@ -90,41 +86,12 @@ int main( void )
 	// Use our shader
 	glUseProgram(programID);
 
-	/*
-	// basic mesh: a rectangle
-	const float meshVertices[] = {
-		-0.5f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f
-	};
-
-	// buffer for the vertices of the mesh
-	GLuint meshVerticesBuffer;
-	glGenBuffers(1, &meshVerticesBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, meshVerticesBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(meshVertices), meshVertices, GL_STATIC_DRAW);
-
-	// buffer for position and size of every particle
-	const unsigned MAX_NR_PARTICLES = 100;
-	GLuint particlePositionsBuffer;
-	glGenBuffers(1, &particlePositionsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particlePositionsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_NR_PARTICLES * 4 * sizeof(float), NULL, GL_STREAM_DRAW);
-
-	// buffer for color of every particle
-	GLuint particleColorsBuffer;
-	glGenBuffers(1, &particleColorsBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, particleColorsBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_NR_PARTICLES * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
-	*/
-
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	//glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
+	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
 	// glm::mat4 Projection = glm::ortho(30.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Or, for an ortho camera :
 	// left, right, bottom, top, angle1, angle2
@@ -149,13 +116,8 @@ int main( void )
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-	// 1rst attribute buffer : vertices
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glEnableVertexAttribArray(0);
-	// glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
 		4,                  // size
@@ -164,10 +126,6 @@ int main( void )
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
-
-	// Send our transformation to the currently bound shader, 
-	// in the "MVP" uniform
-	// glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 	GLuint colorBuffer;
 	glGenBuffers(1, &colorBuffer);
@@ -183,13 +141,21 @@ int main( void )
 	);
 
 	unsigned simulationTime = 0;
+
+	std::set<int> verticalLines;
+	std::set<int> horizontalLines;
+
+	bool justEnded = true;
+	float *cpuBufferLines;
 	
 	do{
+
+		glUseProgram(programID);
 
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
 
-		// every 5 steps, create a new rectangle
+		// every 75 steps, create a new rectangle
 		if (simulationTime % 75 == 0 && !endSimulation) {
 			// create rectangle
 			Rectangle rectangle;
@@ -202,8 +168,8 @@ int main( void )
 		delete [] cpuBufferColors;
 		cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
 		cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
-		// fill up new cpu position buffers
 
+		// fill up new cpu position buffers
 		float rectangleCoords[2 * 3 * 4];
 		unsigned coordCounter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
@@ -233,10 +199,14 @@ int main( void )
 
 		// transfer data to position and color buffers
 		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
+		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints);
 
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
+		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			// std::cout << "updating rectangle id: " << i << std::endl;
@@ -259,6 +229,46 @@ int main( void )
 			} else {
 				it = rectangles.erase(it);
 			}
+		}
+
+		if (endSimulation) {
+			if (justEnded) {
+				justEnded = false;
+
+				// get vertical and horizontal coords of every line that should be drawn
+				for (unsigned i = 0; i < rectangles.size(); i++) {
+					int left = rectangles[i].getLeft();
+					int right = rectangles[i].getRight();
+					int bottom = rectangles[i].getBottom();
+					int top = rectangles[i].getTop();
+					verticalLines.insert(left);
+					verticalLines.insert(right);
+					horizontalLines.insert(bottom);
+					horizontalLines.insert(top);
+				}
+
+				unsigned nrVerticalLines = verticalLines.size();
+				unsigned nrHorizontalLines = horizontalLines.size();
+				unsigned nrLines = nrVerticalLines + nrHorizontalLines;
+				// 1 line 2 points each; 1 point 2 coord each
+				cpuBufferLines = new float[nrLines * 4];
+				unsigned counter = 0;
+				for (std::set<int>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
+					cpuBufferLines[counter++] = *it;
+					cpuBufferLines[counter++] = 10;
+					cpuBufferLines[counter++] = *it;
+					cpuBufferLines[counter++] = -10;
+				}
+
+				for (std::set<int>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
+					cpuBufferLines[counter++] = -10;
+					cpuBufferLines[counter++] = *it;
+					cpuBufferLines[counter++] = 10;
+					cpuBufferLines[counter++] = *it;
+				}
+			}
+
+			// glUseProgram(programID2);
 		}
 
 		// Swap buffers
@@ -288,6 +298,7 @@ int main( void )
 
 	delete [] cpuBufferDataPoints;
 	delete [] cpuBufferColors;
+	delete [] cpuBufferLines;
 
 	return 0;
 }

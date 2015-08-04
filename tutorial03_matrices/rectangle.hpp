@@ -49,6 +49,11 @@ public:
 	bool isAlive();
 	void checkPinned(double x, double y);
 
+	int getLeft();
+	int getRight();
+	int getTop();
+	int getBottom();
+
 };
 
 #endif
