@@ -23,8 +23,11 @@ using namespace glm;
 #include <iostream>
 #include <ctime>
 #include <unistd.h>	// usleep()
+#include <sstream>
+#include <string>
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
+void updateFPSCounter(GLFWwindow * window);
 bool endSimulation = false;
 
 std::vector<Rectangle> rectangles;
@@ -152,6 +155,8 @@ int main( void )
 	
 	do{
 
+		// update window's title to show fps
+		updateFPSCounter(window);
 		glUseProgram(programID);
 
 		// Clear the screen
@@ -228,6 +233,7 @@ int main( void )
 				glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 				// Draw 1 rectangle (2 triangles, 3 vertices each)
 				glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
+				// glDrawArrays(GL_LINES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
 			} else {
 				// std::cout << "rectangle " << i << " is dead" << std::endl;
 			}
@@ -391,4 +397,24 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 		endSimulation = true;
 		std::cout << "right click" << std::endl;
 	}
+}
+
+void updateFPSCounter(GLFWwindow * window)
+{
+	static double previousTime = glfwGetTime();
+	static int frameCount = 0;
+	double currentTime = glfwGetTime();
+	double elapsedTime = currentTime - previousTime;
+
+	// take averages every 0.25 seconds
+	if (elapsedTime > 0.25) {
+		previousTime = currentTime;
+		double fps = static_cast<double>(frameCount) / elapsedTime;
+		std::stringstream ss;
+		ss << "Mondrian @fps(" << fps << ")";
+		glfwSetWindowTitle(window, ss.str().c_str());
+		frameCount = 0;
+	}
+
+	frameCount++;
 }
