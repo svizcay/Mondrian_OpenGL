@@ -38,6 +38,10 @@ int main( void )
 	// init random seed equal to current time
 	std::srand(std::time(0));
 
+	// windows size
+	int windowWidth = 600;
+	int windowHeight = 600;
+
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
 	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
 	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
@@ -56,7 +60,7 @@ int main( void )
 
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
-	window = glfwCreateWindow( 600, 600, "Mondrian", NULL, NULL);
+	window = glfwCreateWindow(windowWidth, windowHeight, "Mondrian", NULL, NULL);
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
@@ -161,6 +165,10 @@ int main( void )
 
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
+
+		// update viewport 
+		glfwGetWindowSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
 		// every 75 steps, create a new rectangle
 		if (simulationTime % 75 == 0 && !endSimulation) {
