@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Include GLEW
+// Include GLEW (always before glfw)
 #include <GL/glew.h>
 
 // Include GLFW
@@ -88,7 +88,7 @@ int main( void )
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders( "SimpleTransform.vertexshader", "SingleColor.fragmentshader" );
+	GLuint programID = LoadShaders( "SimpleTransform.vertexshader.glsl", "SingleColor.fragmentshader.glsl" );
 
 	// Use our shader
 	glUseProgram(programID);
@@ -249,7 +249,7 @@ int main( void )
 
 		if (endSimulation && !justEnded) {
 			// std::cout << "drawing lines..." << std::endl;
-			glm::mat4 MVP = glm::mat4(1.0f);
+			glm::mat4 MVP = Projection * View * glm::mat4(1.0f);
 			glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 			glDrawArrays(GL_LINES, rectangles.size()*2*3, nrLines * 2); // 3 indices starting at 0 -> 1 triangle
 		}
@@ -320,7 +320,7 @@ int main( void )
 				counter = 0;
 				for (unsigned i = 0; i < nrLines; i++) {
 					cpuBufferColorLines[counter++] = 0.5;	// r
-					cpuBufferColorLines[counter++] = 0,5;	// g
+					cpuBufferColorLines[counter++] = 0.5;	// g
 					cpuBufferColorLines[counter++] = 0.5;	// b
 					cpuBufferColorLines[counter++] = 1;	// a
 				}
@@ -369,6 +369,7 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 		// std::cout << "click on: " << xpos << " " << ypos << std::endl;
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
 		// std::cout << "window's size: " << windowWidth << " " << windowHeight << std::endl;
+		/*
 		double normalizedX = xpos * 1.0 / windowWidth;
 		double normalizedY = ypos * 1.0 / windowHeight;
 		double modelCoordX;
@@ -392,12 +393,23 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 			modelCoordY = normalizedY * 20;
 			modelCoordY = (10 - modelCoordY);
 		}
+		*/
 
-		// std::cout << "(" << modelCoordX << "," << modelCoordY << ")" << std::endl;
+		// normalized device coordinates
+		double ndcx = 2.0 * xpos / windowWidth - 1.0;
+		double ndcy = 1.0 - (2.0 * ypos) / windowHeight;
+
+		// std::cout << "(" << ndcx << "," << ndcy << ")" << std::endl;
+
+		// world coordinates
+		double worldx = ndcx * 10;
+		double worldy = ndcy * 10;
+
+		// std::cout << "(" << worldx << "," << worldy << ")" << std::endl;
 		// usleep(3000000);
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
-			rectangles[i].checkPinned(modelCoordX, modelCoordY);
+			rectangles[i].checkPinned(worldx, worldy);
 		}
 	}
 
