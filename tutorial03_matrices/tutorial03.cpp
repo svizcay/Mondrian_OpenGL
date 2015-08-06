@@ -1,6 +1,5 @@
 // Include standard headers
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 // Include GLEW (always before glfw)
 #include <GL/glew.h>
@@ -11,7 +10,6 @@
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-using namespace glm;
 
 #include <common/shader.hpp>
 #include <common/controls.hpp>
@@ -21,7 +19,7 @@ using namespace glm;
 #include <set>
 #include <iostream>
 #include <ctime>
-#include <unistd.h>	// usleep()
+// #include <unistd.h>	// usleep()
 #include <sstream>
 #include <string>
 
@@ -43,8 +41,8 @@ int main( void )
 	int windowHeight = 600;
 
 	// Initialise GLFW
-	if( !glfwInit() ) {
-		fprintf( stderr, "Failed to initialize GLFW\n" );
+	if(!glfwInit()) {
+		std::cerr << "Failed to initialize GLFW" << std::endl;
 		return -1;
 	}
 
@@ -56,8 +54,8 @@ int main( void )
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
 	window = glfwCreateWindow(windowWidth, windowHeight, "Mondrian", NULL, NULL);
-	if( window == NULL ) {
-		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+	if(window == NULL) {
+		std::cerr << "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials." << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -66,7 +64,7 @@ int main( void )
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) {
-		fprintf(stderr, "Failed to initialize GLEW\n");
+		std::cerr << "Failed to initialize GLEW" << std::endl;
 		return -1;
 	}
 
@@ -75,18 +73,19 @@ int main( void )
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
 	// white background
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	glm::vec4 whiteColor (1.0f, 1.0f, 1.0f, 0.0f);
+	glClearColor(whiteColor.r, whiteColor.g, whiteColor.b, whiteColor.a);
 
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
 	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
 	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
+	float *cpuBufferLines;
 
 	// Create and compile our GLSL program from the shaders
-	// GLuint programID = LoadShaders( "SimpleTransform.vertexshader.glsl", "SingleColor.fragmentshader.glsl" );
 	GLuint rectangleProgram = LoadShaders( "rectangleVertexShader.glsl", "rectangleFragmentShader.glsl" );
 	GLuint lineProgram = LoadShaders( "lineVertexShader.glsl", "lineFragmentShader.glsl" );
 
-	// Use our shader
+	// Use our shader (it's not required to be using a program to bind VAOs)
 	glUseProgram(rectangleProgram);
 
 	// VAOs
@@ -151,15 +150,13 @@ int main( void )
 
 	glBindVertexArray(rectangleVAO);
 
-	unsigned simulationTime = 0;
 
 	std::set<int> verticalLines;
 	std::set<int> horizontalLines;
 	unsigned nrLines = 0;
 
+	unsigned simulationTime = 0;
 	bool justEnded = true;
-	float *cpuBufferLines;
-	float *cpuBufferColorLines;
 	
 	do {
 
@@ -168,7 +165,7 @@ int main( void )
 		glUseProgram(rectangleProgram);
 
 		// Clear the screen
-		glClear( GL_COLOR_BUFFER_BIT );
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		// update viewport 
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -218,22 +215,18 @@ int main( void )
 
 		// transfer data to position and color buffers
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleVertexBuffer);
-		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints);
-		if (endSimulation && !justEnded) {
-			// std::cout << "transfering lines data points...." << std::endl;
-			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferLines);
-		}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
+		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
+		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints);
+		// if (endSimulation && !justEnded) {
+		//	// std::cout << "transfering lines data points...." << std::endl;
+		//	glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferLines);
+		// }
 
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleColorBuffer);
-		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
-		if (endSimulation && !justEnded) {
-			// std::cout << "transfering lines color points...." << std::endl;
-			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferColorLines);
-		}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
+		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
+		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
 
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			// std::cout << "updating rectangle id: " << i << std::endl;
@@ -290,43 +283,26 @@ int main( void )
 				std::cout << "nr lines to draw: " << nrLines << std::endl;
 				// 1 line = 2 points each; 1 point = 4 coord each;
 				cpuBufferLines = new float[nrLines * 2 * 4];
-				cpuBufferColorLines = new float[nrLines * 2 * 4];
 				unsigned counter = 0;
 				for (std::set<int>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
 					// first point
 					cpuBufferLines[counter++] = *it;	// x
 					cpuBufferLines[counter++] = 10;		// y
-					cpuBufferLines[counter++] = 0;		// z
-					cpuBufferLines[counter++] = 1;		// w
 					// second point
 					cpuBufferLines[counter++] = *it;	// x
 					cpuBufferLines[counter++] = -10;	// y
-					cpuBufferLines[counter++] = 0;		// z
-					cpuBufferLines[counter++] = 1;		// w
-					std::cout << "first line: " << std::endl;
-					std::cout << "(" << *it << "," << 10 << "," << 0 << "," << 1 << ")" << std::endl;
-					std::cout << "(" << *it << "," << -10 << "," << 0 << "," << 1 << ")" << std::endl;
+					// std::cout << "first line: " << std::endl;
+					// std::cout << "(" << *it << "," << 10 << "," << 0 << "," << 1 << ")" << std::endl;
+					// std::cout << "(" << *it << "," << -10 << "," << 0 << "," << 1 << ")" << std::endl;
 				}
 
 				for (std::set<int>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
 					// first point
 					cpuBufferLines[counter++] = -10;	// x
 					cpuBufferLines[counter++] = *it;	// y
-					cpuBufferLines[counter++] = 0;		// z
-					cpuBufferLines[counter++] = 1;		// w
 					// second point
 					cpuBufferLines[counter++] = 10;		// x
 					cpuBufferLines[counter++] = *it;	// y
-					cpuBufferLines[counter++] = 0;		// z
-					cpuBufferLines[counter++] = 1;		// w
-				}
-
-				counter = 0;
-				for (unsigned i = 0; i < nrLines; i++) {
-					cpuBufferColorLines[counter++] = 0.5;	// r
-					cpuBufferColorLines[counter++] = 0.5;	// g
-					cpuBufferColorLines[counter++] = 0.5;	// b
-					cpuBufferColorLines[counter++] = 1;	// a
 				}
 			}
 		}
@@ -344,15 +320,21 @@ int main( void )
 		   glfwWindowShouldClose(window) == 0 );
 
 
+	glBindVertexArray(rectangleVAO);
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
+
+	glBindVertexArray(lineVAO);
+	glDisableVertexAttribArray(0);
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &rectangleVertexBuffer);
 	glDeleteBuffers(1, &rectangleColorBuffer);
 	glDeleteBuffers(1, &lineVertexBuffer);
 	glDeleteProgram(rectangleProgram);
+	glDeleteProgram(lineProgram);
 	glDeleteVertexArrays(1, &rectangleVAO);
+	glDeleteVertexArrays(1, &lineVAO);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
@@ -373,32 +355,6 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 		glfwGetCursorPos(window, &xpos, &ypos);
 		// std::cout << "click on: " << xpos << " " << ypos << std::endl;
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
-		// std::cout << "window's size: " << windowWidth << " " << windowHeight << std::endl;
-		/*
-		double normalizedX = xpos * 1.0 / windowWidth;
-		double normalizedY = ypos * 1.0 / windowHeight;
-		double modelCoordX;
-		double modelCoordY;
-		// std::cout << "click on (normalized): " << normalizedX << " " << normalizedY << std::endl;
-		// TODO: change hardcoded value 10
-		if (normalizedX > 0.5) {
-			// positive X
-			modelCoordX = normalizedX * 20 - 10;
-		} else {
-			// negative X
-			modelCoordX = normalizedX * 20 - 10;
-		}
-
-		if (normalizedY > 0.5) {
-			// negative Y
-			modelCoordY = normalizedY * 20;
-			modelCoordY = -(modelCoordY - 10);
-		} else {
-			// positive Y
-			modelCoordY = normalizedY * 20;
-			modelCoordY = (10 - modelCoordY);
-		}
-		*/
 
 		// normalized device coordinates
 		double ndcx = 2.0 * xpos / windowWidth - 1.0;
