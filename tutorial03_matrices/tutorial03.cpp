@@ -36,6 +36,9 @@ int main( void )
 	// init random seed equal to current time
 	std::srand(std::time(0));
 
+	const unsigned MAX_NR_RECTANGLES = 100;
+	unsigned nrRectanglesAlive = 0;
+
 	// windows size
 	int windowWidth = 600;
 	int windowHeight = 600;
@@ -77,8 +80,8 @@ int main( void )
 	glClearColor(whiteColor.r, whiteColor.g, whiteColor.b, whiteColor.a);
 
 	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
-	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
-	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
+	float cpuBufferDataPoints[MAX_NR_RECTANGLES * 2 * 3 * 4];
+	float cpuBufferColors[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	float *cpuBufferLines;
 
 	// Create and compile our GLSL program from the shaders
@@ -162,7 +165,6 @@ int main( void )
 
 		// update window's title to show fps
 		updateFPSCounter(window);
-		glUseProgram(rectangleProgram);
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -172,18 +174,15 @@ int main( void )
 		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 75 == 0 && !endSimulation) {
+		if (simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
 			rectangles.push_back(rectangle);
+			nrRectanglesAlive++;
 		}
 
 		// update cpu buffers
-		delete [] cpuBufferDataPoints;
-		delete [] cpuBufferColors;
-		cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
-		cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
 
 		// fill up new cpu position buffers
 		float rectangleCoords[2 * 3 * 4];
@@ -192,7 +191,6 @@ int main( void )
 			rectangles[i].getCoords(rectangleCoords);
 			for (unsigned j = 0; j < 2*3*4; j++) {
 				cpuBufferDataPoints[coordCounter] = rectangleCoords[j];
-				// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
 				coordCounter++;
 			}
 		}
@@ -203,15 +201,13 @@ int main( void )
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			rectangles[i].getColorComponents(rectangleColorComponents);
 			for (unsigned j = 0; j < 2*3*4; j++) {
-				// if (j % 4 == 0) std::cout << std::endl;
 				cpuBufferColors[coordCounter] = rectangleColorComponents[j];
-				// std::cout << cpuBufferColors[coordCounter] << " ";
-				// std::cout << cpuBufferDataPoints[coordCounter] << std::endl;
 				coordCounter++;
 			}
 		}
 
-		// TODO: check if i have to enable those attrib with a bound buffer
+		glUseProgram(rectangleProgram);
+		glBindVertexArray(rectangleVAO);
 
 		// transfer data to position and color buffers
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleVertexBuffer);
@@ -228,6 +224,9 @@ int main( void )
 		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
 		// glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
 
+		// draw rectangles
+		glDrawArrays(GL_TRIANGLES, 0, rectangles.size()*2*3); // 3 indices starting at 0 -> 1 triangle
+
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			// std::cout << "updating rectangle id: " << i << std::endl;
 			rectangles[i].updateModel();
@@ -237,7 +236,6 @@ int main( void )
 				// glm::mat4 MVP = Model;
 				glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 				// Draw 1 rectangle (2 triangles, 3 vertices each)
-				glDrawArrays(GL_TRIANGLES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
 				// glDrawArrays(GL_LINES, i*2*3, 2*3); // 3 indices starting at 0 -> 1 triangle
 			} else {
 				// std::cout << "rectangle " << i << " is dead" << std::endl;
@@ -339,8 +337,6 @@ int main( void )
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
-	delete [] cpuBufferDataPoints;
-	delete [] cpuBufferColors;
 	delete [] cpuBufferLines;		// make sure new was executed, i.e: right click event
 
 	return 0;
