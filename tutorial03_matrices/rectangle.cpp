@@ -91,6 +91,19 @@ void Rectangle::getColorComponents(float * colorComponents)
 	}
 }
 
+void Rectangle::getMVPComponents(float * mvpComponents)
+{
+	unsigned counter = 0;
+	for (unsigned i = 0; i < 4; i++) {
+		for (unsigned j = 0; j < 4; j++) {
+			for (unsigned vertex = 0; vertex < 6; vertex++) {
+				mvpComponents[vertex * 16 + counter] = modelMatrix[i][j];
+			}
+			counter++;
+		}
+	}
+}
+
 glm::mat4 Rectangle::getModel()
 {
 	return modelMatrix;
@@ -166,6 +179,11 @@ glm::mat4 Rectangle::getInitialPosition()
 			std::cerr << "ERROR: wrong value" << std::endl;
 			return glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
 	}
+}
+
+bool Rectangle::getIsPinned()
+{
+	return isPinned;
 }
 
 bool Rectangle::shouldBeAlive()
