@@ -37,7 +37,6 @@ int main( void )
 	std::srand(std::time(0));
 
 	const unsigned MAX_NR_RECTANGLES = 100;
-	unsigned nrRectanglesAlive = 0;
 
 	// windows size
 	int windowWidth = 600;
@@ -221,14 +220,15 @@ int main( void )
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
 		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
+		// std::cout << "nr rectangles: " << rectangles.size() << std::endl;
+
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES && nrRectanglesAlive < 3) {
+		if (simulationTime % 75 == 0 && !endSimulation && rectangles.size() < 2) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
 			rectangles.push_back(rectangle);
-			nrRectanglesAlive++;
 		}
 
 		// update cpu buffers
@@ -261,13 +261,23 @@ int main( void )
 			glm::mat4 MVP = Projection * View * Model;
 			// TODO: try to transfer glm::mat MVP to buffer directly with glBufferData
 			unsigned counter = 0;
-			for (unsigned row = 0; row < 4; row++) {
-				for (unsigned col = 0; col < 4; col++) {
-					for (unsigned vertex = 0; vertex < 6; vertex++) {
-						// TODO: verify this array index
-						cpuBufferMVP[i * vertex * 6 + counter] = MVP[row][col];
+
+			// for (unsigned row = 0; row < 4; row++) {
+			// 	for (unsigned col = 0; col < 4; col++) {
+			// 		for (unsigned vertex = 0; vertex < 6; vertex++) {
+			// 			// TODO: verify this array index
+			// 			cpuBufferMVP[i * vertex * 6 + counter] = MVP[row][col];
+			// 		}
+			// 		counter ++;
+			// 	}
+			// }
+
+			for (unsigned vertex = 0; vertex < 6; vertex++) {
+				for (unsigned row = 0; row < 4; row++) {
+					for (unsigned col = 0; col < 4; col++) {
+						cpuBufferMVP[counter] = MVP[row][col];
+						counter++;
 					}
-					counter ++;
 				}
 			}
 		}
