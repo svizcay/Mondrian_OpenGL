@@ -99,11 +99,6 @@ int main( void )
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(rectangleProgram, "MVP");
 
-	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 4.0f, 0.1f, 100.0f);
-	// glm::mat4 Projection = glm::ortho(30.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	// Or, for an ortho camera :
 	// left, right, bottom, top, angle1, angle2
 	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
 	
@@ -113,20 +108,10 @@ int main( void )
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 						   );
-	// glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
-	// Model matrix : an identity matrix (model will be at the origin)
-	// glm::mat4 scaleM = glm::scale(glm::mat4(1.0f), glm::vec3(1,1,1));
-	// glm::vec3 rotationAxis (1, 0, 0);
-	// glm::mat4 rotateM = glm::rotate(glm::mat4(1.0f), 90.0f, rotationAxis);
-	// glm::mat4 translateM = glm::translate(glm::mat4(1.0f), glm::vec3(1,1,1));
 
-	// glm::mat4 Model      = glm::mat4(1.0f);
-	// glm::mat4 Model      = translateM * rotateM * scaleM;
-	// Our ModelViewProjection : multiplication of our 3 matrices
-
-	GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	GLuint rectangleVertexBuffer;
+	glGenBuffers(1, &rectangleVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, rectangleVertexBuffer);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
@@ -137,9 +122,9 @@ int main( void )
 		(void*)0            // array buffer offset
 	);
 
-	GLuint colorBuffer;
-	glGenBuffers(1, &colorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+	GLuint rectangleColorBuffer;
+	glGenBuffers(1, &rectangleColorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, rectangleColorBuffer);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(
 		1,                  // attribute. No particular reason for 0, but must match the layout in the shader.
@@ -149,6 +134,22 @@ int main( void )
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
+
+	glBindVertexArray(lineVAO);
+	GLuint lineVertexBuffer;
+	glGenBuffers(1, &lineVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		2,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	glBindVertexArray(rectangleVAO);
 
 	unsigned simulationTime = 0;
 
@@ -216,7 +217,7 @@ int main( void )
 		// TODO: check if i have to enable those attrib with a bound buffer
 
 		// transfer data to position and color buffers
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, rectangleVertexBuffer);
 		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints, GL_STREAM_DRAW);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferDataPoints);
@@ -225,7 +226,7 @@ int main( void )
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, sizeof(float) * nrLines * 2 * 4, cpuBufferLines);
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, rectangleColorBuffer);
 		// glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, NULL, GL_STREAM_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors);
@@ -347,8 +348,9 @@ int main( void )
 	glDisableVertexAttribArray(1);
 
 	// Cleanup VBO and shader
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &colorBuffer);
+	glDeleteBuffers(1, &rectangleVertexBuffer);
+	glDeleteBuffers(1, &rectangleColorBuffer);
+	glDeleteBuffers(1, &lineVertexBuffer);
 	glDeleteProgram(rectangleProgram);
 	glDeleteVertexArrays(1, &rectangleVAO);
 
