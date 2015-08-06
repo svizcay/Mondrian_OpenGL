@@ -2,3 +2,4 @@
 *.o
 *.exe
 build/
+tutorial03_matrices/tutorial03_matrices
