@@ -102,6 +102,7 @@ int main( void )
 
 	// left, right, bottom, top, angle1, angle2
 	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
+	// glm::mat4 Projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f,1.0f,100.0f); // In world coordinates
 	
 	// Camera matrix
 	glm::mat4 View = glm::lookAt(
@@ -222,7 +223,7 @@ int main( void )
 
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime == 0 && simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES) {
+		if (simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES && nrRectanglesAlive < 3) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
@@ -322,6 +323,7 @@ int main( void )
 					float right = rectangles[i].getRight();
 					float bottom = rectangles[i].getBottom();
 					float top = rectangles[i].getTop();
+					// std::cout << "left: " << left << " right: " << right << " top: " << top << " bottom: " << bottom << std::endl;
 					verticalLines.insert(left);
 					verticalLines.insert(right);
 					horizontalLines.insert(bottom);
@@ -337,35 +339,43 @@ int main( void )
 			cpuBufferLines = new float[nrLines * 2 * 2];
 			unsigned counter = 0;
 			for (std::set<float>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
+				glm::vec4 firstPoint (*it, 10, 0, 1);
+				glm::vec4 secondPoint (*it, -10, 0, 1);
+				glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				glm::vec4 secondPointMVP = Projection * View * secondPoint;
 				// first point
-				cpuBufferLines[counter] = *it;	// x
+				cpuBufferLines[counter] = firstPointMVP.x;	// x
 				counter++;
-				cpuBufferLines[counter] = 10;		// y
+				cpuBufferLines[counter] = firstPointMVP.y;		// y
 				counter++;
 				// second point
-				cpuBufferLines[counter] = *it;	// x
+				cpuBufferLines[counter] = secondPointMVP.x;	// x
 				counter++;
-				cpuBufferLines[counter] = -10;	// y
+				cpuBufferLines[counter] = secondPointMVP.y;	// y
 				counter++;
-				std::cout << "vertical line: " << std::endl;
-				std::cout << "(" << *it << "," << 10 << ")" << std::endl;
-				std::cout << "(" << *it << "," << -10 << ")" << std::endl;
+				// std::cout << "vertical line: " << std::endl;
+				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
+				// std::cout << "(" << secondPointMVP.x << "," << secondPointMVP.y << ")" << std::endl;
 			}
 
 			for (std::set<float>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
+				glm::vec4 firstPoint (-10, *it, 0, 1);
+				glm::vec4 secondPoint (10, *it, 0, 1);
+				glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				glm::vec4 secondPointMVP = Projection * View * secondPoint;
 				// first point
-				cpuBufferLines[counter] = -10;	// x
+				cpuBufferLines[counter] = firstPointMVP.x;	// x
 				counter++;
-				cpuBufferLines[counter] = *it;	// y
+				cpuBufferLines[counter] = firstPointMVP.y;	// y
 				counter++;
 				// second point
-				cpuBufferLines[counter] = 10;		// x
+				cpuBufferLines[counter] = secondPointMVP.x;		// x
 				counter++;
-				cpuBufferLines[counter] = *it;	// y
+				cpuBufferLines[counter] = secondPointMVP.y;	// y
 				counter++;
-				std::cout << "horizontal line: " << std::endl;
-				std::cout << "(" << -10 << "," << *it << ")" << std::endl;
-				std::cout << "(" << 10 << "," << *it << ")" << std::endl;
+				// std::cout << "horizontal line: " << std::endl;
+				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
+				// std::cout << "(" << secondPointMVP.x << "," << secondPointMVP.y << ")" << std::endl;
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
