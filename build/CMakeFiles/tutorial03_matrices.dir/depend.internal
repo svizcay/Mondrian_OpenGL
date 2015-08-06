@@ -6,6 +6,7 @@ CMakeFiles/tutorial03_matrices.dir/common/shader.cpp.o
  /home/orica/Downloads/OpenGL-tutorial_v0014_33/common/shader.cpp
  /home/orica/Downloads/OpenGL-tutorial_v0014_33/common/shader.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o
+ ../external/glfw-3.0.3/include/GLFW/glfw3.h
  ../external/glm-0.9.4.0/glm/./core/_detail.hpp
  ../external/glm-0.9.4.0/glm/./core/_fixes.hpp
  ../external/glm-0.9.4.0/glm/./core/_swizzle.hpp
@@ -73,6 +74,7 @@ CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o
  /home/orica/Downloads/OpenGL-tutorial_v0014_33/tutorial03_matrices/rectangle.cpp
  /home/orica/Downloads/OpenGL-tutorial_v0014_33/tutorial03_matrices/rectangle.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/tutorial03.cpp.o
+ .././common/controls.hpp
  .././common/shader.hpp
  ../external/glew-1.9.0/include/GL/glew.h
  ../external/glfw-3.0.3/include/GLFW/glfw3.h

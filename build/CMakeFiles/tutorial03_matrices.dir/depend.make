@@ -5,6 +5,7 @@ CMakeFiles/tutorial03_matrices.dir/common/shader.cpp.o: ../external/glew-1.9.0/i
 CMakeFiles/tutorial03_matrices.dir/common/shader.cpp.o: ../common/shader.cpp
 CMakeFiles/tutorial03_matrices.dir/common/shader.cpp.o: ../common/shader.hpp
 
+CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../external/glfw-3.0.3/include/GLFW/glfw3.h
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../external/glm-0.9.4.0/glm/./core/_detail.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../external/glm-0.9.4.0/glm/./core/_fixes.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../external/glm-0.9.4.0/glm/./core/_swizzle.hpp
@@ -72,6 +73,7 @@ CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../exter
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../tutorial03_matrices/rectangle.cpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/rectangle.cpp.o: ../tutorial03_matrices/rectangle.hpp
 
+CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/tutorial03.cpp.o: .././common/controls.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/tutorial03.cpp.o: .././common/shader.hpp
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/tutorial03.cpp.o: ../external/glew-1.9.0/include/GL/glew.h
 CMakeFiles/tutorial03_matrices.dir/tutorial03_matrices/tutorial03.cpp.o: ../external/glfw-3.0.3/include/GLFW/glfw3.h

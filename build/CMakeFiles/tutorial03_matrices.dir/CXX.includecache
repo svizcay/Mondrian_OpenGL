@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+.././common/controls.hpp
+
 .././common/shader.hpp
 
 ../external/glew-1.9.0/include/GL/glew.h
@@ -431,10 +433,22 @@ glm/gtc/matrix_transform.hpp
 -
 common/shader.hpp
 -
+common/controls.hpp
+-
 rectangle.hpp
 /home/orica/Downloads/OpenGL-tutorial_v0014_33/tutorial03_matrices/rectangle.hpp
 vector
 -
+set
+-
 iostream
+-
+ctime
+-
+unistd.h
+-
+sstream
+-
+string
 -
 
