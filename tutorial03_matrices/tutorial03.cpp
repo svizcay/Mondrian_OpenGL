@@ -224,7 +224,7 @@ int main( void )
 
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 75 == 0 && !endSimulation && rectangles.size() < 2) {
+		if (simulationTime % 75 == 0 && !endSimulation && rectangles.size() < MAX_NR_RECTANGLES) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
