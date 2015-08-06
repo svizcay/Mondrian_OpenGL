@@ -51,10 +51,10 @@ public:
 	bool getIsPinned();
 	void checkPinned(double x, double y);
 
-	int getLeft();
-	int getRight();
-	int getTop();
-	int getBottom();
+	float getLeft();
+	float getRight();
+	float getTop();
+	float getBottom();
 
 };
 

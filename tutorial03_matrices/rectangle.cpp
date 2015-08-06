@@ -298,25 +298,25 @@ void Rectangle::checkPinned(double x, double y)
 	}
 }
 
-int Rectangle::getLeft()
+float Rectangle::getLeft()
 {
 	glm::vec4 newA = modelMatrix * vertexa;
 	return newA.x;
 }
 
-int Rectangle::getRight()
+float Rectangle::getRight()
 {
 	glm::vec4 newD = modelMatrix * vertexd;
 	return newD.x;
 }
 
-int Rectangle::getTop()
+float Rectangle::getTop()
 {
 	glm::vec4 newB = modelMatrix * vertexb;
 	return newB.y;
 }
 
-int Rectangle::getBottom()
+float Rectangle::getBottom()
 {
 	glm::vec4 newC = modelMatrix * vertexc;
 	return newC.y;

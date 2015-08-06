@@ -201,8 +201,8 @@ int main( void )
 	glBindVertexArray(rectangleVAO);
 
 
-	std::set<int> verticalLines;
-	std::set<int> horizontalLines;
+	std::set<float> verticalLines;
+	std::set<float> horizontalLines;
 	unsigned nrLines = 0;
 
 	unsigned simulationTime = 0;
@@ -222,7 +222,7 @@ int main( void )
 
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES) {
+		if (simulationTime == 0 && simulationTime % 75 == 0 && !endSimulation && nrRectanglesAlive < MAX_NR_RECTANGLES) {
 			// create rectangle
 			Rectangle rectangle;
 			// insert rectangle into array
@@ -308,54 +308,68 @@ int main( void )
 			glDrawArrays(GL_LINES, 0, nrLines * 2); // 3 indices starting at 0 -> 1 triangle
 		}
 
-		if (endSimulation) {
+		if (endSimulation && justEnded) {
+
+			std::cout << "creating lines..." << std::endl;
+			justEnded = false;
+
 			// load data in cpuBufferLines just the very first time
-			if (justEnded) {
-				std::cout << "creating lines..." << std::endl;
-				justEnded = false;
 
-				// get vertical and horizontal coords of every line that should be drawn
-				for (unsigned i = 0; i < rectangles.size(); i++) {
-					if (rectangles[i].getIsPinned()) {
-						int left = rectangles[i].getLeft();
-						int right = rectangles[i].getRight();
-						int bottom = rectangles[i].getBottom();
-						int top = rectangles[i].getTop();
-						verticalLines.insert(left);
-						verticalLines.insert(right);
-						horizontalLines.insert(bottom);
-						horizontalLines.insert(top);
-					}
-				}
-
-				unsigned nrVerticalLines = verticalLines.size();
-				unsigned nrHorizontalLines = horizontalLines.size();
-				nrLines = nrVerticalLines + nrHorizontalLines;
-				std::cout << "nr lines to draw: " << nrLines << std::endl;
-				// 1 line = 2 points each; 1 point = 4 coord each;
-				cpuBufferLines = new float[nrLines * 2 * 4];
-				unsigned counter = 0;
-				for (std::set<int>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
-					// first point
-					cpuBufferLines[counter++] = *it;	// x
-					cpuBufferLines[counter++] = 10;		// y
-					// second point
-					cpuBufferLines[counter++] = *it;	// x
-					cpuBufferLines[counter++] = -10;	// y
-					// std::cout << "first line: " << std::endl;
-					// std::cout << "(" << *it << "," << 10 << "," << 0 << "," << 1 << ")" << std::endl;
-					// std::cout << "(" << *it << "," << -10 << "," << 0 << "," << 1 << ")" << std::endl;
-				}
-
-				for (std::set<int>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
-					// first point
-					cpuBufferLines[counter++] = -10;	// x
-					cpuBufferLines[counter++] = *it;	// y
-					// second point
-					cpuBufferLines[counter++] = 10;		// x
-					cpuBufferLines[counter++] = *it;	// y
+			// get vertical and horizontal coords of every line that should be drawn
+			for (unsigned i = 0; i < rectangles.size(); i++) {
+				if (rectangles[i].getIsPinned()) {
+					float left = rectangles[i].getLeft();
+					float right = rectangles[i].getRight();
+					float bottom = rectangles[i].getBottom();
+					float top = rectangles[i].getTop();
+					verticalLines.insert(left);
+					verticalLines.insert(right);
+					horizontalLines.insert(bottom);
+					horizontalLines.insert(top);
 				}
 			}
+
+			unsigned nrVerticalLines = verticalLines.size();
+			unsigned nrHorizontalLines = horizontalLines.size();
+			nrLines = nrVerticalLines + nrHorizontalLines;
+			std::cout << "nr lines to draw: " << nrLines << std::endl;
+			// 1 line = 2 points each; 1 point = 2 coord each;
+			cpuBufferLines = new float[nrLines * 2 * 2];
+			unsigned counter = 0;
+			for (std::set<float>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
+				// first point
+				cpuBufferLines[counter] = *it;	// x
+				counter++;
+				cpuBufferLines[counter] = 10;		// y
+				counter++;
+				// second point
+				cpuBufferLines[counter] = *it;	// x
+				counter++;
+				cpuBufferLines[counter] = -10;	// y
+				counter++;
+				std::cout << "vertical line: " << std::endl;
+				std::cout << "(" << *it << "," << 10 << ")" << std::endl;
+				std::cout << "(" << *it << "," << -10 << ")" << std::endl;
+			}
+
+			for (std::set<float>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
+				// first point
+				cpuBufferLines[counter] = -10;	// x
+				counter++;
+				cpuBufferLines[counter] = *it;	// y
+				counter++;
+				// second point
+				cpuBufferLines[counter] = 10;		// x
+				counter++;
+				cpuBufferLines[counter] = *it;	// y
+				counter++;
+				std::cout << "horizontal line: " << std::endl;
+				std::cout << "(" << -10 << "," << *it << ")" << std::endl;
+				std::cout << "(" << 10 << "," << *it << ")" << std::endl;
+			}
+
+			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * nrLines * 2 * 2, cpuBufferLines, GL_STATIC_DRAW);
 		}
 
 		// Swap buffers
