@@ -7,7 +7,6 @@
 
 // Include GLFW
 #include <glfw3.h>
-GLFWwindow* window;
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -28,9 +27,10 @@ using namespace glm;
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 void updateFPSCounter(GLFWwindow * window);
-bool endSimulation = false;
 
+GLFWwindow* window;
 std::vector<Rectangle> rectangles;
+bool endSimulation = false;
 
 int main( void )
 {
