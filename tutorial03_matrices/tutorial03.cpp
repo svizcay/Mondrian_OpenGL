@@ -42,13 +42,8 @@ int main( void )
 	int windowWidth = 600;
 	int windowHeight = 600;
 
-	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
-	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
-	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
-
 	// Initialise GLFW
-	if( !glfwInit() )
-	{
+	if( !glfwInit() ) {
 		fprintf( stderr, "Failed to initialize GLFW\n" );
 		return -1;
 	}
@@ -61,7 +56,7 @@ int main( void )
 	// Open a window and create its OpenGL context
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
 	window = glfwCreateWindow(windowWidth, windowHeight, "Mondrian", NULL, NULL);
-	if( window == NULL ){
+	if( window == NULL ) {
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
 		glfwTerminate();
 		return -1;
@@ -82,19 +77,27 @@ int main( void )
 	// white background
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-	// VAO
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
+	// nr rectangles * 2 triangles each * 3 vertices * 4 floats
+	float *cpuBufferDataPoints = new float[rectangles.size() * 2 * 3 * 4];
+	float *cpuBufferColors = new float[rectangles.size() * 2 * 3 * 4];
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders( "SimpleTransform.vertexshader.glsl", "SingleColor.fragmentshader.glsl" );
+	// GLuint programID = LoadShaders( "SimpleTransform.vertexshader.glsl", "SingleColor.fragmentshader.glsl" );
+	GLuint rectangleProgram = LoadShaders( "rectangleVertexShader.glsl", "rectangleFragmentShader.glsl" );
+	GLuint lineProgram = LoadShaders( "lineVertexShader.glsl", "lineFragmentShader.glsl" );
 
 	// Use our shader
-	glUseProgram(programID);
+	glUseProgram(rectangleProgram);
+
+	// VAOs
+	GLuint rectangleVAO;
+	GLuint lineVAO;
+	glGenVertexArrays(1, &rectangleVAO);
+	glGenVertexArrays(1, &lineVAO);
+	glBindVertexArray(rectangleVAO);
 
 	// Get a handle for our "MVP" uniform
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint MatrixID = glGetUniformLocation(rectangleProgram, "MVP");
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	// glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f);
@@ -105,7 +108,7 @@ int main( void )
 	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
 	
 	// Camera matrix
-	glm::mat4 View       = glm::lookAt(
+	glm::mat4 View = glm::lookAt(
 								glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
@@ -157,11 +160,11 @@ int main( void )
 	float *cpuBufferLines;
 	float *cpuBufferColorLines;
 	
-	do{
+	do {
 
 		// update window's title to show fps
 		updateFPSCounter(window);
-		glUseProgram(programID);
+		glUseProgram(rectangleProgram);
 
 		// Clear the screen
 		glClear( GL_COLOR_BUFFER_BIT );
@@ -346,8 +349,8 @@ int main( void )
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteBuffers(1, &colorBuffer);
-	glDeleteProgram(programID);
-	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteProgram(rectangleProgram);
+	glDeleteVertexArrays(1, &rectangleVAO);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
