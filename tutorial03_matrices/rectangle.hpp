@@ -55,6 +55,7 @@ public:
 	float getRight();
 	float getTop();
 	float getBottom();
+	unsigned getID();
 
 };
 

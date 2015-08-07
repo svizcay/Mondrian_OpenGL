@@ -321,3 +321,7 @@ float Rectangle::getBottom()
 	glm::vec4 newC = modelMatrix * vertexc;
 	return newC.y;
 }
+unsigned Rectangle::getID()
+{
+	return id;
+}
