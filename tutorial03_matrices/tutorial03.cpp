@@ -82,10 +82,14 @@ int main( void )
 	float cpuBufferDataPoints[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	float cpuBufferColors[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	// nr rectangles * 2 triangles each * 3 vertices * 4x4 floats
+<<<<<<< HEAD
 	float cpuBufferMVProw1[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	float cpuBufferMVProw2[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	float cpuBufferMVProw3[MAX_NR_RECTANGLES * 2 * 3 * 4];
 	float cpuBufferMVProw4[MAX_NR_RECTANGLES * 2 * 3 * 4];
+=======
+	float cpuBufferMVP[MAX_NR_RECTANGLES * 2 * 3 * 4 * 4];
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 	float *cpuBufferLines;
 
 	// Create and compile our GLSL program from the shaders
@@ -139,6 +143,7 @@ int main( void )
 		(void*)0            // array buffer offset
 	);
 
+<<<<<<< HEAD
 	std::cout << "before rectangle MVP buffer initialization" << std::endl;
 
 	// GLuint rectangleMVPBuffer;
@@ -205,6 +210,70 @@ int main( void )
 		(void*)0            // array buffer offset
 	);
 
+=======
+	GLuint rectangleMVPBuffer;
+	glGenBuffers(1, &rectangleMVPBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, rectangleMVPBuffer);
+	int pos1 = 2+0;
+	int pos2 = 2+1;
+	int pos3 = 2+2;
+	int pos4 = 2+3;
+	glEnableVertexAttribArray(pos1);
+	glEnableVertexAttribArray(pos2);
+	glEnableVertexAttribArray(pos3);
+	glEnableVertexAttribArray(pos4);
+	glVertexAttribPointer(
+		pos1,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,						// size
+		GL_FLOAT,				// type
+		GL_FALSE,				// normalized?
+		sizeof(float) * 4 * 4,	// stride
+		(void*)(0)				// array buffer offset
+	);
+	glVertexAttribPointer(
+		pos2,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,						// size
+		GL_FLOAT,				// type
+		GL_FALSE,				// normalized?
+		sizeof(float) * 4 * 4,	// stride
+		(void*)(sizeof(float) * 4)				// array buffer offset
+	);
+	glVertexAttribPointer(
+		pos3,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,						// size
+		GL_FLOAT,				// type
+		GL_FALSE,				// normalized?
+		sizeof(float) * 4 * 4,	// stride
+		(void*)(sizeof(float) * 8)				// array buffer offset
+	);
+	glVertexAttribPointer(
+		pos4,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,						// size
+		GL_FLOAT,				// type
+		GL_FALSE,				// normalized?
+		sizeof(float) * 4 * 4,	// stride
+		(void*)(sizeof(float) * 12)				// array buffer offset
+	);
+	glVertexAttribDivisor(pos1, 1);
+	glVertexAttribDivisor(pos2, 1);
+	glVertexAttribDivisor(pos3, 1);
+	glVertexAttribDivisor(pos4, 1);
+
+	glBindVertexArray(lineVAO);
+	GLuint lineVertexBuffer;
+	glGenBuffers(1, &lineVertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(
+		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+		2,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 	glBindVertexArray(rectangleVAO);
 
 
@@ -229,6 +298,10 @@ int main( void )
 
 		// std::cout << "nr rectangles: " << rectangles.size() << std::endl;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 		// every 75 steps, create a new rectangle
 		if (simulationTime % 75 == 0 && !endSimulation && rectangles.size() < MAX_NR_RECTANGLES) {
 			// create rectangle
@@ -265,11 +338,15 @@ int main( void )
 		}
 
 		// fill up new cpu mvp buffers
+<<<<<<< HEAD
 		unsigned counter = 0;
+=======
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			glm::mat4 Model = rectangles[i].getModel();
 			glm::mat4 MVP = Projection * View * Model;
 			// TODO: try to transfer glm::mat MVP to buffer directly with glBufferData
+<<<<<<< HEAD
 
 			for (unsigned vertex = 0; vertex < 6; vertex++) {
 				for (unsigned element = 0; element < 4; element++) {
@@ -278,6 +355,26 @@ int main( void )
 					cpuBufferMVProw3[counter] = MVP[2][element];
 					cpuBufferMVProw4[counter] = MVP[3][element];
 					counter++;
+=======
+			unsigned counter = 0;
+
+			// for (unsigned row = 0; row < 4; row++) {
+			// 	for (unsigned col = 0; col < 4; col++) {
+			// 		for (unsigned vertex = 0; vertex < 6; vertex++) {
+			// 			// TODO: verify this array index
+			// 			cpuBufferMVP[i * vertex * 6 + counter] = MVP[row][col];
+			// 		}
+			// 		counter ++;
+			// 	}
+			// }
+
+			for (unsigned vertex = 0; vertex < 6; vertex++) {
+				for (unsigned row = 0; row < 4; row++) {
+					for (unsigned col = 0; col < 4; col++) {
+						cpuBufferMVP[counter] = MVP[row][col];
+						counter++;
+					}
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 				}
 			}
 		}
@@ -292,6 +389,7 @@ int main( void )
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleColorBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferColors, GL_STREAM_DRAW);
 
+<<<<<<< HEAD
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw1Buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferMVProw1, GL_STREAM_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw2Buffer);
@@ -300,6 +398,10 @@ int main( void )
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferMVProw3, GL_STREAM_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw4Buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4, cpuBufferMVProw4, GL_STREAM_DRAW);
+=======
+		glBindBuffer(GL_ARRAY_BUFFER, rectangleMVPBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rectangles.size() * 2 * 3 * 4 * 4, cpuBufferMVP, GL_STREAM_DRAW);
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 
 		// draw rectangles
 		glDrawArrays(GL_TRIANGLES, 0, rectangles.size()*2*3); // 3 indices starting at 0 -> 1 triangle
@@ -424,10 +526,14 @@ int main( void )
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &rectangleVertexBuffer);
 	glDeleteBuffers(1, &rectangleColorBuffer);
+<<<<<<< HEAD
 	glDeleteBuffers(1, &rectangleMVProw1Buffer);
 	glDeleteBuffers(1, &rectangleMVProw2Buffer);
 	glDeleteBuffers(1, &rectangleMVProw3Buffer);
 	glDeleteBuffers(1, &rectangleMVProw4Buffer);
+=======
+	glDeleteBuffers(1, &rectangleMVPBuffer);
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 	glDeleteBuffers(1, &lineVertexBuffer);
 	glDeleteProgram(rectangleProgram);
 	glDeleteProgram(lineProgram);

@@ -90,8 +90,8 @@ add_executable(tutorial03_matrices
 	common/shader.cpp
 	common/shader.hpp
 
-	tutorial03_matrices/SimpleTransform.vertexshader
-	tutorial03_matrices/SingleColor.fragmentshader
+	tutorial03_matrices/SimpleTransform.vertexshader.glsl
+	tutorial03_matrices/SingleColor.fragmentshader.glsl
 )
 #set_target_properties(tutorial03_matrices PROPERTIES RUNTIME_OUTPUT_DIRECTORY /test1)
 target_link_libraries(tutorial03_matrices

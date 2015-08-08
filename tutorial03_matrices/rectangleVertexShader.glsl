@@ -3,6 +3,7 @@
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec4 vertexPosition_modelspace;
 layout(location = 1) in vec4 inputColor;
+layout(location = 2) in mat4 MVP;
 
 // TODO: try to transfer just one mat4
 layout(location = 2) in vec4 MVProw1;

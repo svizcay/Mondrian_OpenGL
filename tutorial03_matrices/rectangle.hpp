@@ -55,7 +55,10 @@ public:
 	float getRight();
 	float getTop();
 	float getBottom();
+<<<<<<< HEAD
 	unsigned getID();
+=======
+>>>>>>> 5f064d81b9dd1111d95d62749f19aa87a64a77da
 
 };
 
