@@ -43,16 +43,19 @@ public:
 
 	void getCoords(float * coords);
 	void getColorComponents(float * colorComponents);
+	void getMVPComponents(float * mvpComponents);
 	glm::mat4 getModel();
 	void updateModel();
 	bool shouldBeAlive();
 	bool isAlive();
+	bool getIsPinned();
 	void checkPinned(double x, double y);
 
-	int getLeft();
-	int getRight();
-	int getTop();
-	int getBottom();
+	float getLeft();
+	float getRight();
+	float getTop();
+	float getBottom();
+	unsigned getID();
 
 };
 

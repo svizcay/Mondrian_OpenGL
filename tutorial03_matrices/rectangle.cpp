@@ -91,6 +91,19 @@ void Rectangle::getColorComponents(float * colorComponents)
 	}
 }
 
+void Rectangle::getMVPComponents(float * mvpComponents)
+{
+	unsigned counter = 0;
+	for (unsigned i = 0; i < 4; i++) {
+		for (unsigned j = 0; j < 4; j++) {
+			for (unsigned vertex = 0; vertex < 6; vertex++) {
+				mvpComponents[vertex * 16 + counter] = modelMatrix[i][j];
+			}
+			counter++;
+		}
+	}
+}
+
 glm::mat4 Rectangle::getModel()
 {
 	return modelMatrix;
@@ -128,12 +141,20 @@ void Rectangle::updateModel()
 
 glm::vec4 Rectangle::getRandomColor()
 {
-	float red = std::rand() * 1.0 / RAND_MAX;
-	float green = std::rand() * 1.0 / RAND_MAX;
-	float blue = std::rand() * 1.0 / RAND_MAX;
-	glm::vec4 color (red, green, blue, 1);
-	// std::cout << color.x << " " << color.y << " " << color.z << std::endl;
-	return color;
+	enum class Color {RED, BLACK, BLUE, YELLOW};
+	Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	switch (randomColor) {
+		case Color::RED:
+			return glm::vec4 color (1, 0, 0, 1);
+		case Color::BLACK:
+			return glm::vec4 color (0, 0, 0, 1);
+		case Color::BLUE:
+			return glm::vec4 color (0, 0, 1, 1);
+		case Color::YELLOW:
+			return glm::vec4 color (0, 1, 1, 1);
+		default:
+			return glm::vec4 color (0.5, 0.5, 0.5, 1);
+	}
 }
 
 // random proportion sizes between 1 and 10
@@ -166,6 +187,11 @@ glm::mat4 Rectangle::getInitialPosition()
 			std::cerr << "ERROR: wrong value" << std::endl;
 			return glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
 	}
+}
+
+bool Rectangle::getIsPinned()
+{
+	return isPinned;
 }
 
 bool Rectangle::shouldBeAlive()
@@ -280,26 +306,30 @@ void Rectangle::checkPinned(double x, double y)
 	}
 }
 
-int Rectangle::getLeft()
+float Rectangle::getLeft()
 {
 	glm::vec4 newA = modelMatrix * vertexa;
 	return newA.x;
 }
 
-int Rectangle::getRight()
+float Rectangle::getRight()
 {
 	glm::vec4 newD = modelMatrix * vertexd;
 	return newD.x;
 }
 
-int Rectangle::getTop()
+float Rectangle::getTop()
 {
 	glm::vec4 newB = modelMatrix * vertexb;
 	return newB.y;
 }
 
-int Rectangle::getBottom()
+float Rectangle::getBottom()
 {
 	glm::vec4 newC = modelMatrix * vertexc;
 	return newC.y;
+}
+unsigned Rectangle::getID()
+{
+	return id;
 }
