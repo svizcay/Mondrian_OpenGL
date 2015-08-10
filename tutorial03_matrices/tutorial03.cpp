@@ -22,6 +22,7 @@
 // #include <unistd.h>	// usleep()
 #include <sstream>
 #include <string>
+#include <cmath>
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 void updateFPSCounter(GLFWwindow * window);
@@ -71,6 +72,10 @@ int main( void )
 		std::cerr << "Failed to initialize GLEW" << std::endl;
 		return -1;
 	}
+
+	// enable z-buffer
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -221,7 +226,7 @@ int main( void )
 		updateFPSCounter(window);
 
 		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// update viewport 
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -270,13 +275,37 @@ int main( void )
 			glm::mat4 Model = rectangles[i].getModel();
 			glm::mat4 MVP = Projection * View * Model;
 			// TODO: try to transfer glm::mat MVP to buffer directly with glBufferData
+			glm::vec4 vertexa = Model * rectangles[i].getVertexA();
+			glm::vec4 vertexb = Model * rectangles[i].getVertexB();
+			glm::vec4 vertexc = Model * rectangles[i].getVertexC();
+			glm::vec4 vertexd = Model * rectangles[i].getVertexD();
+
+			// std::cout << "final positions: " << std::endl;
+			// std::cout << vertexa.x << " " << vertexa.y << " " << vertexa.z << std::endl;
+			// std::cout << vertexb.x << " " << vertexb.y << " " << vertexb.z << std::endl;
+			// std::cout << vertexc.x << " " << vertexc.y << " " << vertexc.z << std::endl;
+			// std::cout << vertexd.x << " " << vertexd.y << " " << vertexd.z << std::endl;
 
 			for (unsigned vertex = 0; vertex < 6; vertex++) {
 				for (unsigned element = 0; element < 4; element++) {
+					// cpuBufferMVProw1[counter] = static_cast<int>(MVP[0][element]);
+					// cpuBufferMVProw2[counter] = static_cast<int>(MVP[1][element]);
+					// cpuBufferMVProw3[counter] = static_cast<int>(MVP[2][element]);
+					// cpuBufferMVProw4[counter] = static_cast<int>(MVP[3][element]);
 					cpuBufferMVProw1[counter] = MVP[0][element];
 					cpuBufferMVProw2[counter] = MVP[1][element];
 					cpuBufferMVProw3[counter] = MVP[2][element];
 					cpuBufferMVProw4[counter] = MVP[3][element];
+					// std::cout << "double: " << std::endl;
+					// std::cout << MVP[0][element] << " ";
+					// std::cout << MVP[1][element] << " ";
+					// std::cout << MVP[2][element] << " ";
+					// std::cout << MVP[3][element] << std::endl;
+					// std::cout << "int: " << std::endl;
+					// std::cout << cpuBufferMVProw1[counter] << " ";
+					// std::cout << cpuBufferMVProw2[counter] << " ";
+					// std::cout << cpuBufferMVProw3[counter] << " ";
+					// std::cout << cpuBufferMVProw4[counter] << std::endl;
 					counter++;
 				}
 			}
@@ -335,11 +364,11 @@ int main( void )
 			// get vertical and horizontal coords of every line that should be drawn
 			for (unsigned i = 0; i < rectangles.size(); i++) {
 				if (rectangles[i].getIsPinned()) {
-					float left = rectangles[i].getLeft();
-					float right = rectangles[i].getRight();
-					float bottom = rectangles[i].getBottom();
-					float top = rectangles[i].getTop();
-					// std::cout << "left: " << left << " right: " << right << " top: " << top << " bottom: " << bottom << std::endl;
+					int left = static_cast<int>(round(rectangles[i].getLeft()));
+					int right = static_cast<int>(round(rectangles[i].getRight()));
+					int bottom = static_cast<int>(round(rectangles[i].getBottom()));
+					int top = static_cast<int>(round(rectangles[i].getTop()));
+					std::cout << "left: " << left << " right: " << right << " top: " << top << " bottom: " << bottom << std::endl;
 					verticalLines.insert(left);
 					verticalLines.insert(right);
 					horizontalLines.insert(bottom);

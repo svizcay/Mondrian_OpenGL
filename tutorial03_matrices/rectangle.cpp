@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 const float Rectangle::surfaceSize = 1;
 unsigned Rectangle::counter = 0;
@@ -29,7 +30,7 @@ Rectangle::Rectangle()
 	isPinned = false;
 	isDead = false;
 
-	previousTime = 0;
+	previousTime = glfwGetTime();
 	currentTime = glfwGetTime();
 
 	counter++;
@@ -46,10 +47,14 @@ Rectangle::Rectangle()
 	float halfy = proportion.y / 2.0;
 	float scaledHalfx = scaleFactor * halfx;
 	float scaledHalfy = scaleFactor * halfy;
-	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, 0, 1);
-	vertexb = glm::vec4(scaledHalfx, scaledHalfy, 0, 1);
-	vertexc = glm::vec4(-scaledHalfx, -scaledHalfy, 0, 1);
-	vertexd = glm::vec4(scaledHalfx, -scaledHalfy, 0, 1);
+
+	// int zbuffer = static_cast<int>(std::rand() * 1.0 / RAND_MAX * 2 - 1);
+	zbuffer = -0.5;
+
+	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, zbuffer, 1);
+	vertexb = glm::vec4(scaledHalfx, scaledHalfy, zbuffer, 1);
+	vertexc = glm::vec4(-scaledHalfx, -scaledHalfy, zbuffer, 1);
+	vertexd = glm::vec4(scaledHalfx, -scaledHalfy, zbuffer, 1);
 }
 
 void Rectangle::getCoords(float * coords)
@@ -112,29 +117,33 @@ glm::mat4 Rectangle::getModel()
 
 void Rectangle::updateModel()
 {
-	previousTime = currentTime;
+	// previousTime = currentTime;
 	currentTime = glfwGetTime();
 	double deltaTime = currentTime - previousTime;
 	// double deltaTime = 0.1;
 	// std::cout << "ID: " << id << " delta time: " << deltaTime << " [" << previousTime << " : " << currentTime << "]" << std::endl;
-	double speed = 5;
-	if (!isPinned) {
-		switch (spawningSite) {
-			case 0:	// from left to right
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(speed * deltaTime, 0, 0));
-				break;
-			case 1:	// from bottom to top
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, speed * deltaTime, 0));
-				break;
-			case 2: // from right to left
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(-speed * deltaTime, 0, 0));
-				break;
-			case 3:	// from top to bottom
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -speed * deltaTime, 0));
-				break;
-			default:
-				std::cerr << "ERROR: wrong value" << std::endl;
+	if (deltaTime > 0.5) {
+		previousTime = currentTime;
+		double speed = 2;
+		int translation = static_cast<int>(speed * deltaTime);
+		if (!isPinned) {
+			switch (spawningSite) {
+				case 0:	// from left to right
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(translation, 0, 0));
+					break;
+				case 1:	// from bottom to top
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(0, translation, 0));
+					break;
+				case 2: // from right to left
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(-translation, 0, 0));
+					break;
+				case 3:	// from top to bottom
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -translation, 0));
+					break;
+				default:
+					std::cerr << "ERROR: wrong value" << std::endl;
 
+			}
 		}
 	}
 }
@@ -170,11 +179,12 @@ glm::vec4 Rectangle::getRandomColor()
 // random proportion sizes between 1 and 10
 glm::vec2 Rectangle::getRandomProportion()
 {
-	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
-	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
+	int x = static_cast<int>(round((std::rand() * 1.0 / RAND_MAX) * 10 + 1));
+	int y = static_cast<int>(round((std::rand() * 1.0 / RAND_MAX) * 10 + 1));
 	// TODO: change this lines
 	glm::vec2 proportion (x, y);
 	// glm::vec2 proportion (1, 1);
+	// std::cout << "proportion: " << proportion.x << " " << proportion.y << std::endl;
 	return proportion;
 }
 
@@ -341,4 +351,24 @@ float Rectangle::getBottom()
 unsigned Rectangle::getID()
 {
 	return id;
+}
+
+glm::vec4 Rectangle::getVertexA()
+{
+	return vertexa;
+}
+
+glm::vec4 Rectangle::getVertexB()
+{
+	return vertexb;
+}
+
+glm::vec4 Rectangle::getVertexC()
+{
+	return vertexc;
+}
+
+glm::vec4 Rectangle::getVertexD()
+{
+	return vertexd;
 }

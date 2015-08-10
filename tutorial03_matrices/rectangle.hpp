@@ -20,6 +20,8 @@ private:
 	// model = translate * rotate * scale
 	glm::mat4 modelMatrix;
 
+	double zbuffer;
+
 	bool isPinned;
 	bool isDead;
 
@@ -55,6 +57,11 @@ public:
 	float getTop();
 	float getBottom();
 	unsigned getID();
+
+	glm::vec4 getVertexA();
+	glm::vec4 getVertexB();
+	glm::vec4 getVertexC();
+	glm::vec4 getVertexD();
 };
 
 #endif
