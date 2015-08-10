@@ -18,7 +18,7 @@ Rectangle::Rectangle()
 
 	position = glm::vec4(0, 0, 0, 1);
 
-	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
+	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(2, 2, 1));
 	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 0, 1));
 	translationMatrix = getInitialPosition();
 	// modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
@@ -117,7 +117,7 @@ void Rectangle::updateModel()
 	double deltaTime = currentTime - previousTime;
 	// double deltaTime = 0.1;
 	// std::cout << "ID: " << id << " delta time: " << deltaTime << " [" << previousTime << " : " << currentTime << "]" << std::endl;
-	double speed = 10;
+	double speed = 5;
 	if (!isPinned) {
 		switch (spawningSite) {
 			case 0:	// from left to right
@@ -143,17 +143,27 @@ glm::vec4 Rectangle::getRandomColor()
 {
 	enum class Color {RED, BLACK, BLUE, YELLOW};
 	Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	glm::vec4 color;
 	switch (randomColor) {
 		case Color::RED:
-			return glm::vec4 color (1, 0, 0, 1);
+			color = glm::vec4 (1, 0, 0, 1);
+			// std::cout << "red" << std::endl;
+			return color;
 		case Color::BLACK:
-			return glm::vec4 color (0, 0, 0, 1);
+			color = glm::vec4 (0, 0, 0, 1);
+			// std::cout << "black" << std::endl;
+			return color;
 		case Color::BLUE:
-			return glm::vec4 color (0, 0, 1, 1);
+			color = glm::vec4 (0, 0, 1, 1);
+			// std::cout << "blue" << std::endl;
+			return color;
 		case Color::YELLOW:
-			return glm::vec4 color (0, 1, 1, 1);
+			color = glm::vec4 (1, 1, 0, 1);
+			// std::cout << "yellow" << std::endl;
+			return color;
 		default:
-			return glm::vec4 color (0.5, 0.5, 0.5, 1);
+			color = glm::vec4 (0.5, 0.5, 0.5, 1);
+			return color;
 	}
 }
 
@@ -239,7 +249,6 @@ bool Rectangle::shouldBeAlive()
 bool Rectangle::isAlive()
 {
 	return !isDead;
-
 }
 
 bool Rectangle::isInside(double x, double y)
