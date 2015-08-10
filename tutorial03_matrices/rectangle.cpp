@@ -49,7 +49,7 @@ Rectangle::Rectangle()
 	float scaledHalfy = scaleFactor * halfy;
 
 	// int zbuffer = static_cast<int>(std::rand() * 1.0 / RAND_MAX * 2 - 1);
-	zbuffer = -0.5;
+	zbuffer = 0.0;
 
 	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, zbuffer, 1);
 	vertexb = glm::vec4(scaledHalfx, scaledHalfy, zbuffer, 1);

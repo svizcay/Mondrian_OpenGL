@@ -115,7 +115,7 @@ int main( void )
 		
 	// Camera matrix
 	glm::mat4 View = glm::lookAt(
-		glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
+		glm::vec3(0,0,10), // Camera is at (4,3,3), in World Space
 		glm::vec3(0,0,0), // and looks at the origin
 		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 	);
@@ -210,6 +210,10 @@ int main( void )
 		(void*)0			// array buffer offset
 	);
 
+	// get a handle for MVP uniform matrix in line program (it's not required
+	// to be using the line program right now
+	// GLuint lineMVPID = glGetUniformLocation(lineProgram, "MVP");
+
 	glBindVertexArray(rectangleVAO);
 
 
@@ -219,6 +223,8 @@ int main( void )
 
 	unsigned simulationTime = 0;
 	bool justEnded = true;
+
+	double lineThickness = 0.1;
 		
 	do {
 
@@ -351,7 +357,7 @@ int main( void )
 			glUseProgram(lineProgram);
 			glBindVertexArray(lineVAO);
 			// std::cout << "drawing lines..." << std::endl;
-			glDrawArrays(GL_LINES, 0, nrLines * 2); // 3 indices starting at 0 -> 1 triangle
+			glDrawArrays(GL_TRIANGLES, 0, nrLines * 2 * 3); // 3 indices starting at 0 -> 1 triangle
 		}
 
 		if (endSimulation && justEnded) {
@@ -364,6 +370,7 @@ int main( void )
 			// get vertical and horizontal coords of every line that should be drawn
 			for (unsigned i = 0; i < rectangles.size(); i++) {
 				if (rectangles[i].getIsPinned()) {
+					// values in {-10:10}
 					int left = static_cast<int>(round(rectangles[i].getLeft()));
 					int right = static_cast<int>(round(rectangles[i].getRight()));
 					int bottom = static_cast<int>(round(rectangles[i].getBottom()));
@@ -380,23 +387,47 @@ int main( void )
 			unsigned nrHorizontalLines = horizontalLines.size();
 			nrLines = nrVerticalLines + nrHorizontalLines;
 			std::cout << "nr lines to draw: " << nrLines << std::endl;
-			// 1 line = 2 points each; 1 point = 2 coord each;
-			cpuBufferLines = new float[nrLines * 2 * 2];
+			// 1 line = 2 triangles; 1 triangle = 3 points each; 1 point = 2 coord each;
+			cpuBufferLines = new float[nrLines * 2 * 3 * 2];
 			unsigned counter = 0;
+			glm::mat4 PV = Projection * View;
 			for (std::set<float>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
-				glm::vec4 firstPoint (*it, 10, 0, 1);
-				glm::vec4 secondPoint (*it, -10, 0, 1);
-				glm::vec4 firstPointMVP = Projection * View * firstPoint;
-				glm::vec4 secondPointMVP = Projection * View * secondPoint;
-				// first point
-				cpuBufferLines[counter] = firstPointMVP.x;		// x
+				glm::vec4 vertexA (*it - lineThickness, 10, 0, 1);
+				glm::vec4 vertexB (*it + lineThickness, 10, 0, 1);
+				glm::vec4 vertexC (*it - lineThickness, -10, 0, 1);
+				glm::vec4 vertexD (*it + lineThickness, -10, 0, 1);
+				vertexA = PV * vertexA;
+				vertexB = PV * vertexB;
+				vertexC = PV * vertexC;
+				vertexD = PV * vertexD;
+				// glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				// glm::vec4 secondPointMVP = Projection * View * secondPoint;
+				// sent the points in {-10:10} domain
+				// first triangle ABC
+				cpuBufferLines[counter] = vertexA.x;		// x
 				counter++;
-				cpuBufferLines[counter] = firstPointMVP.y;				// y
+				cpuBufferLines[counter] = vertexA.y;		// y
 				counter++;
-				// second point
-				cpuBufferLines[counter] = secondPointMVP.x;		// x
+				cpuBufferLines[counter] = vertexB.x;		// x
 				counter++;
-				cpuBufferLines[counter] = secondPointMVP.y;		// y
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				// second triangle BCD
+				cpuBufferLines[counter] = vertexB.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexD.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexD.y;		// y
 				counter++;
 				// std::cout << "vertical line: " << std::endl;
 				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
@@ -404,19 +435,41 @@ int main( void )
 			}
 
 			for (std::set<float>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
-				glm::vec4 firstPoint (-10, *it, 0, 1);
-				glm::vec4 secondPoint (10, *it, 0, 1);
-				glm::vec4 firstPointMVP = Projection * View * firstPoint;
-				glm::vec4 secondPointMVP = Projection * View * secondPoint;
-				// first point
-				cpuBufferLines[counter] = firstPointMVP.x;		// x
+				glm::vec4 vertexA (-10, *it + lineThickness, 0, 1);
+				glm::vec4 vertexB (10, *it + lineThickness, 0, 1);
+				glm::vec4 vertexC (-10, *it - lineThickness, 0, 1);
+				glm::vec4 vertexD (10, *it - lineThickness, 0, 1);
+				vertexA = PV * vertexA;
+				vertexB = PV * vertexB;
+				vertexC = PV * vertexC;
+				vertexD = PV * vertexD;
+				// glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				// glm::vec4 secondPointMVP = Projection * View * secondPoint;
+				// first triangle ABC
+				cpuBufferLines[counter] = vertexA.x;		// x
 				counter++;
-				cpuBufferLines[counter] = firstPointMVP.y;		// y
+				cpuBufferLines[counter] = vertexA.y;		// y
 				counter++;
-				// second point
-				cpuBufferLines[counter] = secondPointMVP.x;				// x
+				cpuBufferLines[counter] = vertexB.x;		// x
 				counter++;
-				cpuBufferLines[counter] = secondPointMVP.y;		// y
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				// second triangle BCD
+				cpuBufferLines[counter] = vertexB.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexD.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexD.y;		// y
 				counter++;
 				// std::cout << "horizontal line: " << std::endl;
 				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
@@ -424,7 +477,12 @@ int main( void )
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * nrLines * 2 * 2, cpuBufferLines, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * nrLines * 2 * 3 * 2, cpuBufferLines, GL_STATIC_DRAW);
+
+
+			// send MVP matrix to line program
+			// TODO: check if i need to be using line program and to have bound line VAO
+			// glUniformMatrix4fv(lineMVPID, 1, GL_FALSE, &PV[0][0]);
 		}
 
 		// Swap buffers
