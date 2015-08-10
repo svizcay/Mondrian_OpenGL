@@ -320,7 +320,7 @@ void Rectangle::checkPinned(double x, double y)
 		// check if (x,y) is inside rectangle ABCD
 		if (isInside(x, y)) {
 			isPinned = true;
-			std::cout << "pinned!" << std::endl;
+			// std::cout << "pinned!" << std::endl;
 		}
 	}
 }
