@@ -49,7 +49,7 @@ Rectangle::Rectangle()
 	float scaledHalfy = scaleFactor * halfy;
 
 	// int zbuffer = static_cast<int>(std::rand() * 1.0 / RAND_MAX * 2 - 1);
-	zbuffer = 0.0;
+	zbuffer = 0;
 
 	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, zbuffer, 1);
 	vertexb = glm::vec4(scaledHalfx, scaledHalfy, zbuffer, 1);
@@ -122,9 +122,14 @@ void Rectangle::updateModel()
 	double deltaTime = currentTime - previousTime;
 	// double deltaTime = 0.1;
 	// std::cout << "ID: " << id << " delta time: " << deltaTime << " [" << previousTime << " : " << currentTime << "]" << std::endl;
-	if (deltaTime > 0.5) {
+	
+	/*
+	 * non-continuous
+	 */
+	/*
+	if (deltaTime > 0.1) {
 		previousTime = currentTime;
-		double speed = 2;
+		double speed = 10;
 		int translation = static_cast<int>(speed * deltaTime);
 		if (!isPinned) {
 			switch (spawningSite) {
@@ -144,6 +149,33 @@ void Rectangle::updateModel()
 					std::cerr << "ERROR: wrong value" << std::endl;
 
 			}
+		}
+	}
+	*/
+
+	/*
+	 * continuous
+	 */
+	previousTime = currentTime;
+	double speed = 5;
+	double translation = speed * deltaTime;
+	if (!isPinned) {
+		switch (spawningSite) {
+			case 0:	// from left to right
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(translation, 0, 0));
+				break;
+			case 1:	// from bottom to top
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, translation, 0));
+				break;
+			case 2: // from right to left
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(-translation, 0, 0));
+				break;
+			case 3:	// from top to bottom
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -translation, 0));
+				break;
+			default:
+				std::cerr << "ERROR: wrong value" << std::endl;
+
 		}
 	}
 }

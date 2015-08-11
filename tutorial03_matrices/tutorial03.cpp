@@ -122,10 +122,11 @@ int main( void )
 	*/
 	// Camera matrix
 	glm::mat4 View = glm::lookAt(
-		glm::vec3(0,0,20), // Camera is at (4,3,3), in World Space
+		glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
 		glm::vec3(0,0,0), // and looks at the origin
 		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 	);
+	// glm::mat4 View = glm::mat4(1.0f);
 
 	GLuint rectangleVertexBuffer;
 	glGenBuffers(1, &rectangleVertexBuffer);
@@ -286,12 +287,13 @@ int main( void )
 		unsigned counter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			glm::mat4 Model = rectangles[i].getModel();
-			glm::mat4 MVP = Projection * View * Model;
+			// glm::mat4 MVP = Projection * View * Model;
+			glm::mat4 MVP = Projection * Model * View;
 			// TODO: try to transfer glm::mat MVP to buffer directly with glBufferData
-			glm::vec4 vertexa = Model * rectangles[i].getVertexA();
-			glm::vec4 vertexb = Model * rectangles[i].getVertexB();
-			glm::vec4 vertexc = Model * rectangles[i].getVertexC();
-			glm::vec4 vertexd = Model * rectangles[i].getVertexD();
+			// glm::vec4 vertexa = Model * rectangles[i].getVertexA();
+			// glm::vec4 vertexb = Model * rectangles[i].getVertexB();
+			// glm::vec4 vertexc = Model * rectangles[i].getVertexC();
+			// glm::vec4 vertexd = Model * rectangles[i].getVertexD();
 
 			// std::cout << "final positions: " << std::endl;
 			// std::cout << vertexa.x << " " << vertexa.y << " " << vertexa.z << std::endl;
@@ -305,10 +307,19 @@ int main( void )
 					// cpuBufferMVProw2[counter] = static_cast<int>(MVP[1][element]);
 					// cpuBufferMVProw3[counter] = static_cast<int>(MVP[2][element]);
 					// cpuBufferMVProw4[counter] = static_cast<int>(MVP[3][element]);
+
+					// TODO swap these lines
 					cpuBufferMVProw1[counter] = MVP[0][element];
 					cpuBufferMVProw2[counter] = MVP[1][element];
 					cpuBufferMVProw3[counter] = MVP[2][element];
 					cpuBufferMVProw4[counter] = MVP[3][element];
+
+					// for these ones
+					// cpuBufferMVProw1[counter] = MVP[element][0];
+					// cpuBufferMVProw2[counter] = MVP[element][1];
+					// cpuBufferMVProw3[counter] = MVP[element][2];
+					// cpuBufferMVProw4[counter] = MVP[element][3];
+
 					// std::cout << "double: " << std::endl;
 					// std::cout << MVP[0][element] << " ";
 					// std::cout << MVP[1][element] << " ";

@@ -20,8 +20,9 @@ void main(){
 	// Output position of the vertex, in clip space : MVP * position
 	// gl_Position =  vertexPosition_modelspace;
 	mat4 MVP = mat4(MVProw1, MVProw2, MVProw3, MVProw4);
-	gl_Position =  MVP * vertexPosition_modelspace;
+	// gl_Position =  vec4((MVP * vertexPosition_modelspace).xy, 0, 1);
 	// gl_Position =  vertexPosition_modelspace;
+	gl_Position =  MVP * vertexPosition_modelspace;
 	fragmentColor = inputColor;
 }
 
