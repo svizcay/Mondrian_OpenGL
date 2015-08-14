@@ -141,12 +141,20 @@ void Rectangle::updateModel()
 
 glm::vec4 Rectangle::getRandomColor()
 {
-	float red = std::rand() * 1.0 / RAND_MAX;
-	float green = std::rand() * 1.0 / RAND_MAX;
-	float blue = std::rand() * 1.0 / RAND_MAX;
-	glm::vec4 color (red, green, blue, 1);
-	// std::cout << color.x << " " << color.y << " " << color.z << std::endl;
-	return color;
+	enum class Color {RED, BLACK, BLUE, YELLOW};
+	Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	switch (randomColor) {
+		case Color::RED:
+			return glm::vec4 color (1, 0, 0, 1);
+		case Color::BLACK:
+			return glm::vec4 color (0, 0, 0, 1);
+		case Color::BLUE:
+			return glm::vec4 color (0, 0, 1, 1);
+		case Color::YELLOW:
+			return glm::vec4 color (0, 1, 1, 1);
+		default:
+			return glm::vec4 color (0.5, 0.5, 0.5, 1);
+	}
 }
 
 // random proportion sizes between 1 and 10

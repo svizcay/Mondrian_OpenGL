@@ -90,8 +90,10 @@ add_executable(tutorial03_matrices
 	common/shader.cpp
 	common/shader.hpp
 
-	tutorial03_matrices/SimpleTransform.vertexshader.glsl
-	tutorial03_matrices/SingleColor.fragmentshader.glsl
+	tutorial03_matrices/rectangleVertexShader.glsl
+	tutorial03_matrices/rectangleFragmentShader.glsl
+	tutorial03_matrices/lineVertexShader.glsl
+	tutorial03_matrices/lineFragmentShader.glsl
 )
 #set_target_properties(tutorial03_matrices PROPERTIES RUNTIME_OUTPUT_DIRECTORY /test1)
 target_link_libraries(tutorial03_matrices
@@ -527,85 +529,85 @@ create_target_launcher(playground WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}
 
 
 
-# Misc 5, with glReadPixels
-add_executable(misc05_picking_slow_easy
-	misc05_picking/misc05_picking_slow_easy.cpp
-	common/shader.cpp
-	common/shader.hpp
-	common/controls.cpp
-	common/controls.hpp
-	common/texture.cpp
-	common/texture.hpp
-	common/objloader.cpp
-	common/objloader.hpp
-	common/vboindexer.cpp
-	common/vboindexer.hpp
-	
-	misc05_picking/StandardShading.vertexshader
-	misc05_picking/StandardShading.fragmentshader
-	misc05_picking/Picking.vertexshader
-	misc05_picking/Picking.fragmentshader
-)
-target_link_libraries(misc05_picking_slow_easy
-	${ALL_LIBS}
-	ANTTWEAKBAR_116_OGLCORE_GLFW
-)
-# Xcode and Visual working directories
-set_target_properties(misc05_picking_slow_easy PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
-create_target_launcher(misc05_picking_slow_easy WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# # Misc 5, with glReadPixels
+# add_executable(misc05_picking_slow_easy
+# 	misc05_picking/misc05_picking_slow_easy.cpp
+# 	common/shader.cpp
+# 	common/shader.hpp
+# 	common/controls.cpp
+# 	common/controls.hpp
+# 	common/texture.cpp
+# 	common/texture.hpp
+# 	common/objloader.cpp
+# 	common/objloader.hpp
+# 	common/vboindexer.cpp
+# 	common/vboindexer.hpp
+# 	
+# 	misc05_picking/StandardShading.vertexshader
+# 	misc05_picking/StandardShading.fragmentshader
+# 	misc05_picking/Picking.vertexshader
+# 	misc05_picking/Picking.fragmentshader
+# )
+# target_link_libraries(misc05_picking_slow_easy
+# 	${ALL_LIBS}
+# 	ANTTWEAKBAR_116_OGLCORE_GLFW
+# )
+# # Xcode and Visual working directories
+# set_target_properties(misc05_picking_slow_easy PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# create_target_launcher(misc05_picking_slow_easy WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
 
-# Misc 5, with custom ray-box intersection
-add_executable(misc05_picking_custom
-	misc05_picking/misc05_picking_custom.cpp
-	common/shader.cpp
-	common/shader.hpp
-	common/controls.cpp
-	common/controls.hpp
-	common/texture.cpp
-	common/texture.hpp
-	common/objloader.cpp
-	common/objloader.hpp
-	common/vboindexer.cpp
-	common/vboindexer.hpp
-	
-	misc05_picking/StandardShading.vertexshader
-	misc05_picking/StandardShading.fragmentshader
-)
-target_link_libraries(misc05_picking_custom
-	${ALL_LIBS}
-	ANTTWEAKBAR_116_OGLCORE_GLFW
-)
-# Xcode and Visual working directories
-set_target_properties(misc05_picking_custom PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
-create_target_launcher(misc05_picking_custom WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
-
-# Misc 5, with Bullet Physics
-add_executable(misc05_picking_BulletPhysics
-	misc05_picking/misc05_picking_BulletPhysics.cpp
-	common/shader.cpp
-	common/shader.hpp
-	common/controls.cpp
-	common/controls.hpp
-	common/texture.cpp
-	common/texture.hpp
-	common/objloader.cpp
-	common/objloader.hpp
-	common/vboindexer.cpp
-	common/vboindexer.hpp
-	
-	misc05_picking/StandardShading.vertexshader
-	misc05_picking/StandardShading.fragmentshader
-)
-target_link_libraries(misc05_picking_BulletPhysics
-	${ALL_LIBS}
-	ANTTWEAKBAR_116_OGLCORE_GLFW
-        BulletDynamics
-        BulletCollision
-        LinearMath
-)
-# Xcode and Visual working directories
-set_target_properties(misc05_picking_BulletPhysics PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
-create_target_launcher(misc05_picking_BulletPhysics WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# # Misc 5, with custom ray-box intersection
+# add_executable(misc05_picking_custom
+# 	misc05_picking/misc05_picking_custom.cpp
+# 	common/shader.cpp
+# 	common/shader.hpp
+# 	common/controls.cpp
+# 	common/controls.hpp
+# 	common/texture.cpp
+# 	common/texture.hpp
+# 	common/objloader.cpp
+# 	common/objloader.hpp
+# 	common/vboindexer.cpp
+# 	common/vboindexer.hpp
+# 	
+# 	misc05_picking/StandardShading.vertexshader
+# 	misc05_picking/StandardShading.fragmentshader
+# )
+# target_link_libraries(misc05_picking_custom
+# 	${ALL_LIBS}
+# 	ANTTWEAKBAR_116_OGLCORE_GLFW
+# )
+# # Xcode and Visual working directories
+# set_target_properties(misc05_picking_custom PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# create_target_launcher(misc05_picking_custom WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# 
+# # Misc 5, with Bullet Physics
+# add_executable(misc05_picking_BulletPhysics
+# 	misc05_picking/misc05_picking_BulletPhysics.cpp
+# 	common/shader.cpp
+# 	common/shader.hpp
+# 	common/controls.cpp
+# 	common/controls.hpp
+# 	common/texture.cpp
+# 	common/texture.hpp
+# 	common/objloader.cpp
+# 	common/objloader.hpp
+# 	common/vboindexer.cpp
+# 	common/vboindexer.hpp
+# 	
+# 	misc05_picking/StandardShading.vertexshader
+# 	misc05_picking/StandardShading.fragmentshader
+# )
+# target_link_libraries(misc05_picking_BulletPhysics
+# 	${ALL_LIBS}
+# 	ANTTWEAKBAR_116_OGLCORE_GLFW
+#         BulletDynamics
+#         BulletCollision
+#         LinearMath
+# )
+# # Xcode and Visual working directories
+# set_target_properties(misc05_picking_BulletPhysics PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
+# create_target_launcher(misc05_picking_BulletPhysics WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/")
 
 
 
