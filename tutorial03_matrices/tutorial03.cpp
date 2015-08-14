@@ -22,6 +22,8 @@
 // #include <unistd.h>	// usleep()
 #include <sstream>
 #include <string>
+#include <cmath>
+#include <iomanip>		// std::setw
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 void updateFPSCounter(GLFWwindow * window);
@@ -57,7 +59,9 @@ int main( void )
 	// window = glfwCreateWindow( 1024, 768, "Tutorial 03 - Matrices", NULL, NULL);
 	window = glfwCreateWindow(windowWidth, windowHeight, "Mondrian", NULL, NULL);
 	if(window == NULL) {
-		std::cerr << "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials." << std::endl;
+		std::cerr << "Failed to open GLFW window.";
+		std::cerr << " If you have an Intel GPU, they are not 3.3 compatible.";
+		std::cerr << " Try the 2.1 version of the tutorials." << std::endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -69,6 +73,10 @@ int main( void )
 		std::cerr << "Failed to initialize GLEW" << std::endl;
 		return -1;
 	}
+
+	// enable z-buffer
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -103,27 +111,65 @@ int main( void )
 	glBindVertexArray(rectangleVAO);
 
 	// left, right, bottom, top, angle1, angle2
-	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
+	// glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,0.0001f,10.0f); // In world coordinates
+	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f); // In world coordinates
+	for (unsigned row = 0; row < 4; row++) {
+		for (unsigned col = 0; col < 4; col++) {
+			std::cout << std::setw(10) << Projection[col][row] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	glm::vec4 testvertex;
+	for (int i = -10; i <= 10; i++) {
+		testvertex = glm::vec4(1.0);
+		testvertex.z = i;
+		testvertex = Projection * testvertex;
+		std::cout << "z = " << std::setw(3) << i << " " << testvertex.z << std::endl;
+	}
+	std::cout << std::endl;
+
 	// glm::mat4 Projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f,1.0f,100.0f); // In world coordinates
-	
+	/*
+	glm::mat4 Projection = glm::perspective(
+		45.0f,         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
+		4.0f / 4.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
+		0.1f,        // Near clipping plane. Keep as big as possible, or you'll get precision issues.
+		100.0f       // Far clipping plane. Keep as little as possible.
+	);		
+	*/
 	// Camera matrix
+	/*
+	 * view es una matriz cuadrada almacenada por columnas (no por filas)
+	 * al poner la camara mirando al origen en una posicion z=2 (positivo),
+	 * lo que hace, es generar una matriz de transformación que moverá el objeto
+	 * en el eje z dos unidades de "w" */
 	glm::mat4 View = glm::lookAt(
-								glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
-								glm::vec3(0,0,0), // and looks at the origin
-								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-						   );
+		glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
+		glm::vec3(0,0,0), // and looks at the origin
+		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+	);
+	// glm::mat4 View = glm::mat4(1.0f);
+	/*
+	for (unsigned row = 0; row < 4; row++) {
+		for (unsigned col = 0; col < 4; col++) {
+			std::cout << std::setw(3) << View[col][row] << " ";
+		}
+		std::cout << std::endl;
+	}
+	*/
 
 	GLuint rectangleVertexBuffer;
 	glGenBuffers(1, &rectangleVertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleVertexBuffer);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
-		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-		4,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
+		0,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,					// size
+		GL_FLOAT,			// type
+		GL_FALSE,			// normalized?
+		0,					// stride
+		(void*)0			// array buffer offset
 	);
 
 	GLuint rectangleColorBuffer;
@@ -131,15 +177,13 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleColorBuffer);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(
-		1,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-		4,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
+		1,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,					// size
+		GL_FLOAT,			// type
+		GL_FALSE,			// normalized?
+		0,					// stride
+		(void*)0			// array buffer offset
 	);
-
-	std::cout << "before rectangle MVP buffer initialization" << std::endl;
 
 	// GLuint rectangleMVPBuffer;
 	GLuint rectangleMVProw1Buffer;
@@ -153,42 +197,42 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw1Buffer);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(
-		2,					// attribute. No particular reason for 0, but must match the layout in the shader.
-		4,						// size
-		GL_FLOAT,				// type
-		GL_FALSE,				// normalized?
-		0,	// stride
-		(void*)(0)				// array buffer offset
+		2,										// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,												// size
+		GL_FLOAT,								// type
+		GL_FALSE,								// normalized?
+		0,		// stride
+		(void*)(0)								// array buffer offset
 	);
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw2Buffer);
 	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(
-		3,					// attribute. No particular reason for 0, but must match the layout in the shader.
-		4,						// size
-		GL_FLOAT,				// type
-		GL_FALSE,				// normalized?
-		0,	// stride
-		(void*)(0)				// array buffer offset
+		3,										// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,												// size
+		GL_FLOAT,								// type
+		GL_FALSE,								// normalized?
+		0,		// stride
+		(void*)(0)								// array buffer offset
 	);
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw3Buffer);
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(
-		4,					// attribute. No particular reason for 0, but must match the layout in the shader.
-		4,						// size
-		GL_FLOAT,				// type
-		GL_FALSE,				// normalized?
-		0,	// stride
-		(void*)(0)				// array buffer offset
+		4,										// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,												// size
+		GL_FLOAT,								// type
+		GL_FALSE,								// normalized?
+		0,		// stride
+		(void*)(0)								// array buffer offset
 	);
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleMVProw4Buffer);
 	glEnableVertexAttribArray(5);
 	glVertexAttribPointer(
-		5,					// attribute. No particular reason for 0, but must match the layout in the shader.
-		4,						// size
-		GL_FLOAT,				// type
-		GL_FALSE,				// normalized?
-		0,	// stride
-		(void*)(0)				// array buffer offset
+		5,										// attribute. No particular reason for 0, but must match the layout in the shader.
+		4,												// size
+		GL_FLOAT,								// type
+		GL_FALSE,								// normalized?
+		0,		// stride
+		(void*)(0)								// array buffer offset
 	);
 
 	glBindVertexArray(lineVAO);
@@ -197,13 +241,17 @@ int main( void )
 	glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
-		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-		2,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
+		0,					// attribute. No particular reason for 0, but must match the layout in the shader.
+		2,					// size
+		GL_FLOAT,			// type
+		GL_FALSE,			// normalized?
+		0,					// stride
+		(void*)0			// array buffer offset
 	);
+
+	// get a handle for MVP uniform matrix in line program (it's not required
+	// to be using the line program right now
+	// GLuint lineMVPID = glGetUniformLocation(lineProgram, "MVP");
 
 	glBindVertexArray(rectangleVAO);
 
@@ -214,14 +262,16 @@ int main( void )
 
 	unsigned simulationTime = 0;
 	bool justEnded = true;
-	
+
+	double lineThickness = 0.1;
+		
 	do {
 
 		// update window's title to show fps
 		updateFPSCounter(window);
 
 		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// update viewport 
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
@@ -230,11 +280,11 @@ int main( void )
 		// std::cout << "nr rectangles: " << rectangles.size() << std::endl;
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 75 == 0 && !endSimulation && rectangles.size() < MAX_NR_RECTANGLES) {
-			// create rectangle
-			Rectangle rectangle;
-			// insert rectangle into array
-			rectangles.push_back(rectangle);
+		if (simulationTime % 500 == 0 && !endSimulation && rectangles.size() < MAX_NR_RECTANGLES) {
+				// create rectangle
+				Rectangle rectangle;
+				// insert rectangle into array
+				rectangles.push_back(rectangle);
 		}
 
 		// update cpu buffers
@@ -243,40 +293,74 @@ int main( void )
 		float rectangleCoords[2 * 3 * 4];
 		unsigned coordCounter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
-			rectangles[i].getCoords(rectangleCoords);
-			for (unsigned j = 0; j < 2*3*4; j++) {
-				cpuBufferDataPoints[coordCounter] = rectangleCoords[j];
-				coordCounter++;
-			}
-			// std::cout << "rectangle ID: " << rectangles[i].getID() << std::endl;
-			// std::cout << "horizontal: [" << rectangles[i].getLeft() << " : " << rectangles[i].getRight() << "]" << std::endl;
-			// std::cout << "vertical: [" << rectangles[i].getBottom() << " : " << rectangles[i].getTop() << "]" << std::endl;
+				rectangles[i].getCoords(rectangleCoords);
+				for (unsigned j = 0; j < 2*3*4; j++) {
+						cpuBufferDataPoints[coordCounter] = rectangleCoords[j];
+						coordCounter++;
+				}
+				// std::cout << "rectangle ID: " << rectangles[i].getID() << std::endl;
+				// std::cout << "horizontal: [" << rectangles[i].getLeft() << " : " << rectangles[i].getRight() << "]" << std::endl;
+				// std::cout << "vertical: [" << rectangles[i].getBottom() << " : " << rectangles[i].getTop() << "]" << std::endl;
 		}
 
 		// fill up new cpu colors buffers
 		float rectangleColorComponents[2 * 3 * 4];
 		coordCounter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
-			rectangles[i].getColorComponents(rectangleColorComponents);
-			for (unsigned j = 0; j < 2*3*4; j++) {
-				cpuBufferColors[coordCounter] = rectangleColorComponents[j];
-				coordCounter++;
-			}
+				rectangles[i].getColorComponents(rectangleColorComponents);
+				for (unsigned j = 0; j < 2*3*4; j++) {
+						cpuBufferColors[coordCounter] = rectangleColorComponents[j];
+						coordCounter++;
+				}
 		}
 
 		// fill up new cpu mvp buffers
 		unsigned counter = 0;
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			glm::mat4 Model = rectangles[i].getModel();
-			glm::mat4 MVP = Projection * View * Model;
+			// glm::mat4 MVP = Projection * View * Model;
+			glm::mat4 MVP = Projection * Model * View;
 			// TODO: try to transfer glm::mat MVP to buffer directly with glBufferData
+			// glm::vec4 vertexa = Model * rectangles[i].getVertexA();
+			// glm::vec4 vertexb = Model * rectangles[i].getVertexB();
+			// glm::vec4 vertexc = Model * rectangles[i].getVertexC();
+			// glm::vec4 vertexd = Model * rectangles[i].getVertexD();
+
+			// std::cout << "final positions: " << std::endl;
+			// std::cout << vertexa.x << " " << vertexa.y << " " << vertexa.z << std::endl;
+			// std::cout << vertexb.x << " " << vertexb.y << " " << vertexb.z << std::endl;
+			// std::cout << vertexc.x << " " << vertexc.y << " " << vertexc.z << std::endl;
+			// std::cout << vertexd.x << " " << vertexd.y << " " << vertexd.z << std::endl;
 
 			for (unsigned vertex = 0; vertex < 6; vertex++) {
 				for (unsigned element = 0; element < 4; element++) {
+					// cpuBufferMVProw1[counter] = static_cast<int>(MVP[0][element]);
+					// cpuBufferMVProw2[counter] = static_cast<int>(MVP[1][element]);
+					// cpuBufferMVProw3[counter] = static_cast<int>(MVP[2][element]);
+					// cpuBufferMVProw4[counter] = static_cast<int>(MVP[3][element]);
+
+					// TODO swap these lines
 					cpuBufferMVProw1[counter] = MVP[0][element];
 					cpuBufferMVProw2[counter] = MVP[1][element];
 					cpuBufferMVProw3[counter] = MVP[2][element];
 					cpuBufferMVProw4[counter] = MVP[3][element];
+
+					// for these ones
+					// cpuBufferMVProw1[counter] = MVP[element][0];
+					// cpuBufferMVProw2[counter] = MVP[element][1];
+					// cpuBufferMVProw3[counter] = MVP[element][2];
+					// cpuBufferMVProw4[counter] = MVP[element][3];
+
+					// std::cout << "double: " << std::endl;
+					// std::cout << MVP[0][element] << " ";
+					// std::cout << MVP[1][element] << " ";
+					// std::cout << MVP[2][element] << " ";
+					// std::cout << MVP[3][element] << std::endl;
+					// std::cout << "int: " << std::endl;
+					// std::cout << cpuBufferMVProw1[counter] << " ";
+					// std::cout << cpuBufferMVProw2[counter] << " ";
+					// std::cout << cpuBufferMVProw3[counter] << " ";
+					// std::cout << cpuBufferMVProw4[counter] << std::endl;
 					counter++;
 				}
 			}
@@ -322,7 +406,7 @@ int main( void )
 			glUseProgram(lineProgram);
 			glBindVertexArray(lineVAO);
 			// std::cout << "drawing lines..." << std::endl;
-			glDrawArrays(GL_LINES, 0, nrLines * 2); // 3 indices starting at 0 -> 1 triangle
+			glDrawArrays(GL_TRIANGLES, 0, nrLines * 2 * 3); // 3 indices starting at 0 -> 1 triangle
 		}
 
 		if (endSimulation && justEnded) {
@@ -335,11 +419,12 @@ int main( void )
 			// get vertical and horizontal coords of every line that should be drawn
 			for (unsigned i = 0; i < rectangles.size(); i++) {
 				if (rectangles[i].getIsPinned()) {
-					float left = rectangles[i].getLeft();
-					float right = rectangles[i].getRight();
-					float bottom = rectangles[i].getBottom();
-					float top = rectangles[i].getTop();
-					// std::cout << "left: " << left << " right: " << right << " top: " << top << " bottom: " << bottom << std::endl;
+					// values in {-10:10}
+					int left = static_cast<int>(round(rectangles[i].getLeft()));
+					int right = static_cast<int>(round(rectangles[i].getRight()));
+					int bottom = static_cast<int>(round(rectangles[i].getBottom()));
+					int top = static_cast<int>(round(rectangles[i].getTop()));
+					std::cout << "left: " << left << " right: " << right << " top: " << top << " bottom: " << bottom << std::endl;
 					verticalLines.insert(left);
 					verticalLines.insert(right);
 					horizontalLines.insert(bottom);
@@ -351,23 +436,47 @@ int main( void )
 			unsigned nrHorizontalLines = horizontalLines.size();
 			nrLines = nrVerticalLines + nrHorizontalLines;
 			std::cout << "nr lines to draw: " << nrLines << std::endl;
-			// 1 line = 2 points each; 1 point = 2 coord each;
-			cpuBufferLines = new float[nrLines * 2 * 2];
+			// 1 line = 2 triangles; 1 triangle = 3 points each; 1 point = 2 coord each;
+			cpuBufferLines = new float[nrLines * 2 * 3 * 2];
 			unsigned counter = 0;
+			glm::mat4 PV = Projection * View;
 			for (std::set<float>::iterator it = verticalLines.begin(); it != verticalLines.end(); it++) {
-				glm::vec4 firstPoint (*it, 10, 0, 1);
-				glm::vec4 secondPoint (*it, -10, 0, 1);
-				glm::vec4 firstPointMVP = Projection * View * firstPoint;
-				glm::vec4 secondPointMVP = Projection * View * secondPoint;
-				// first point
-				cpuBufferLines[counter] = firstPointMVP.x;	// x
+				glm::vec4 vertexA (*it - lineThickness, 10, 0, 1);
+				glm::vec4 vertexB (*it + lineThickness, 10, 0, 1);
+				glm::vec4 vertexC (*it - lineThickness, -10, 0, 1);
+				glm::vec4 vertexD (*it + lineThickness, -10, 0, 1);
+				vertexA = PV * vertexA;
+				vertexB = PV * vertexB;
+				vertexC = PV * vertexC;
+				vertexD = PV * vertexD;
+				// glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				// glm::vec4 secondPointMVP = Projection * View * secondPoint;
+				// sent the points in {-10:10} domain
+				// first triangle ABC
+				cpuBufferLines[counter] = vertexA.x;		// x
 				counter++;
-				cpuBufferLines[counter] = firstPointMVP.y;		// y
+				cpuBufferLines[counter] = vertexA.y;		// y
 				counter++;
-				// second point
-				cpuBufferLines[counter] = secondPointMVP.x;	// x
+				cpuBufferLines[counter] = vertexB.x;		// x
 				counter++;
-				cpuBufferLines[counter] = secondPointMVP.y;	// y
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				// second triangle BCD
+				cpuBufferLines[counter] = vertexB.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexD.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexD.y;		// y
 				counter++;
 				// std::cout << "vertical line: " << std::endl;
 				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
@@ -375,19 +484,41 @@ int main( void )
 			}
 
 			for (std::set<float>::iterator it = horizontalLines.begin(); it != horizontalLines.end(); it++) {
-				glm::vec4 firstPoint (-10, *it, 0, 1);
-				glm::vec4 secondPoint (10, *it, 0, 1);
-				glm::vec4 firstPointMVP = Projection * View * firstPoint;
-				glm::vec4 secondPointMVP = Projection * View * secondPoint;
-				// first point
-				cpuBufferLines[counter] = firstPointMVP.x;	// x
+				glm::vec4 vertexA (-10, *it + lineThickness, 0, 1);
+				glm::vec4 vertexB (10, *it + lineThickness, 0, 1);
+				glm::vec4 vertexC (-10, *it - lineThickness, 0, 1);
+				glm::vec4 vertexD (10, *it - lineThickness, 0, 1);
+				vertexA = PV * vertexA;
+				vertexB = PV * vertexB;
+				vertexC = PV * vertexC;
+				vertexD = PV * vertexD;
+				// glm::vec4 firstPointMVP = Projection * View * firstPoint;
+				// glm::vec4 secondPointMVP = Projection * View * secondPoint;
+				// first triangle ABC
+				cpuBufferLines[counter] = vertexA.x;		// x
 				counter++;
-				cpuBufferLines[counter] = firstPointMVP.y;	// y
+				cpuBufferLines[counter] = vertexA.y;		// y
 				counter++;
-				// second point
-				cpuBufferLines[counter] = secondPointMVP.x;		// x
+				cpuBufferLines[counter] = vertexB.x;		// x
 				counter++;
-				cpuBufferLines[counter] = secondPointMVP.y;	// y
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				// second triangle BCD
+				cpuBufferLines[counter] = vertexB.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexB.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexC.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexC.y;		// y
+				counter++;
+				cpuBufferLines[counter] = vertexD.x;		// x
+				counter++;
+				cpuBufferLines[counter] = vertexD.y;		// y
 				counter++;
 				// std::cout << "horizontal line: " << std::endl;
 				// std::cout << "(" << firstPointMVP.x << "," << firstPointMVP.y << ")" << std::endl;
@@ -395,7 +526,12 @@ int main( void )
 			}
 
 			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * nrLines * 2 * 2, cpuBufferLines, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(float) * nrLines * 2 * 3 * 2, cpuBufferLines, GL_STATIC_DRAW);
+
+
+			// send MVP matrix to line program
+			// TODO: check if i need to be using line program and to have bound line VAO
+			// glUniformMatrix4fv(lineMVPID, 1, GL_FALSE, &PV[0][0]);
 		}
 
 		// Swap buffers
@@ -409,9 +545,7 @@ int main( void )
 		// int dummy;
 		// std::cin >> dummy;
 
-	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+	} while ( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && glfwWindowShouldClose(window) == 0 );
 
 
 	glBindVertexArray(rectangleVAO);
@@ -437,7 +571,7 @@ int main( void )
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
-	delete [] cpuBufferLines;		// make sure new was executed, i.e: right click event
+	delete [] cpuBufferLines;				// make sure new was executed, i.e: right click event
 
 	return 0;
 }

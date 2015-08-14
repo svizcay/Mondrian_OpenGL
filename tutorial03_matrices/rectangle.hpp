@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 
-
 class Rectangle {
 private:
 	static const float surfaceSize;
@@ -20,6 +19,8 @@ private:
 	glm::mat4 scaleMatrix;
 	// model = translate * rotate * scale
 	glm::mat4 modelMatrix;
+
+	double zbuffer;
 
 	bool isPinned;
 	bool isDead;
@@ -57,6 +58,10 @@ public:
 	float getBottom();
 	unsigned getID();
 
+	glm::vec4 getVertexA();
+	glm::vec4 getVertexB();
+	glm::vec4 getVertexC();
+	glm::vec4 getVertexD();
 };
 
 #endif

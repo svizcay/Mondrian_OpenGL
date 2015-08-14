@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 const float Rectangle::surfaceSize = 1;
 unsigned Rectangle::counter = 0;
@@ -18,7 +19,7 @@ Rectangle::Rectangle()
 
 	position = glm::vec4(0, 0, 0, 1);
 
-	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(1, 1, 1));
+	scaleMatrix = glm::scale(glm::mat4(1), glm::vec3(2, 2, 1));
 	rotationMatrix = glm::rotate(glm::mat4(1), 0.0f, glm::vec3(0, 0, 1));
 	translationMatrix = getInitialPosition();
 	// modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
@@ -29,7 +30,7 @@ Rectangle::Rectangle()
 	isPinned = false;
 	isDead = false;
 
-	previousTime = 0;
+	previousTime = glfwGetTime();
 	currentTime = glfwGetTime();
 
 	counter++;
@@ -46,10 +47,14 @@ Rectangle::Rectangle()
 	float halfy = proportion.y / 2.0;
 	float scaledHalfx = scaleFactor * halfx;
 	float scaledHalfy = scaleFactor * halfy;
-	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, 0, 1);
-	vertexb = glm::vec4(scaledHalfx, scaledHalfy, 0, 1);
-	vertexc = glm::vec4(-scaledHalfx, -scaledHalfy, 0, 1);
-	vertexd = glm::vec4(scaledHalfx, -scaledHalfy, 0, 1);
+
+	// int zbuffer = static_cast<int>(std::rand() * 1.0 / RAND_MAX * 2 - 1);
+	zbuffer = 0;
+
+	vertexa = glm::vec4(-scaledHalfx, scaledHalfy, zbuffer, 1);
+	vertexb = glm::vec4(scaledHalfx, scaledHalfy, zbuffer, 1);
+	vertexc = glm::vec4(-scaledHalfx, -scaledHalfy, zbuffer, 1);
+	vertexd = glm::vec4(scaledHalfx, -scaledHalfy, zbuffer, 1);
 }
 
 void Rectangle::getCoords(float * coords)
@@ -112,25 +117,61 @@ glm::mat4 Rectangle::getModel()
 
 void Rectangle::updateModel()
 {
-	previousTime = currentTime;
+	// previousTime = currentTime;
 	currentTime = glfwGetTime();
 	double deltaTime = currentTime - previousTime;
 	// double deltaTime = 0.1;
 	// std::cout << "ID: " << id << " delta time: " << deltaTime << " [" << previousTime << " : " << currentTime << "]" << std::endl;
-	double speed = 10;
+	
+	/*
+	 * non-continuous
+	 */
+	/*
+	if (deltaTime > 0.1) {
+		previousTime = currentTime;
+		double speed = 10;
+		int translation = static_cast<int>(speed * deltaTime);
+		if (!isPinned) {
+			switch (spawningSite) {
+				case 0:	// from left to right
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(translation, 0, 0));
+					break;
+				case 1:	// from bottom to top
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(0, translation, 0));
+					break;
+				case 2: // from right to left
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(-translation, 0, 0));
+					break;
+				case 3:	// from top to bottom
+					modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -translation, 0));
+					break;
+				default:
+					std::cerr << "ERROR: wrong value" << std::endl;
+
+			}
+		}
+	}
+	*/
+
+	/*
+	 * continuous
+	 */
+	previousTime = currentTime;
+	double speed = 5;
+	double translation = speed * deltaTime;
 	if (!isPinned) {
 		switch (spawningSite) {
 			case 0:	// from left to right
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(speed * deltaTime, 0, 0));
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(translation, 0, 0));
 				break;
 			case 1:	// from bottom to top
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, speed * deltaTime, 0));
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, translation, 0));
 				break;
 			case 2: // from right to left
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(-speed * deltaTime, 0, 0));
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(-translation, 0, 0));
 				break;
 			case 3:	// from top to bottom
-				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -speed * deltaTime, 0));
+				modelMatrix = glm::translate(modelMatrix, glm::vec3(0, -translation, 0));
 				break;
 			default:
 				std::cerr << "ERROR: wrong value" << std::endl;
@@ -143,28 +184,39 @@ glm::vec4 Rectangle::getRandomColor()
 {
 	enum class Color {RED, BLACK, BLUE, YELLOW};
 	Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	glm::vec4 color;
 	switch (randomColor) {
 		case Color::RED:
-			return glm::vec4 color (1, 0, 0, 1);
+			color = glm::vec4 (1, 0, 0, 1);
+			// std::cout << "red" << std::endl;
+			return color;
 		case Color::BLACK:
-			return glm::vec4 color (0, 0, 0, 1);
+			color = glm::vec4 (0, 0, 0, 1);
+			// std::cout << "black" << std::endl;
+			return color;
 		case Color::BLUE:
-			return glm::vec4 color (0, 0, 1, 1);
+			color = glm::vec4 (0, 0, 1, 1);
+			// std::cout << "blue" << std::endl;
+			return color;
 		case Color::YELLOW:
-			return glm::vec4 color (0, 1, 1, 1);
+			color = glm::vec4 (1, 1, 0, 1);
+			// std::cout << "yellow" << std::endl;
+			return color;
 		default:
-			return glm::vec4 color (0.5, 0.5, 0.5, 1);
+			color = glm::vec4 (0.5, 0.5, 0.5, 1);
+			return color;
 	}
 }
 
 // random proportion sizes between 1 and 10
 glm::vec2 Rectangle::getRandomProportion()
 {
-	float x = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
-	float y = (std::rand() * 1.0 / RAND_MAX) * 10 + 1;
+	int x = static_cast<int>(round((std::rand() * 1.0 / RAND_MAX) * 10 + 1));
+	int y = static_cast<int>(round((std::rand() * 1.0 / RAND_MAX) * 10 + 1));
 	// TODO: change this lines
 	glm::vec2 proportion (x, y);
 	// glm::vec2 proportion (1, 1);
+	// std::cout << "proportion: " << proportion.x << " " << proportion.y << std::endl;
 	return proportion;
 }
 
@@ -239,7 +291,6 @@ bool Rectangle::shouldBeAlive()
 bool Rectangle::isAlive()
 {
 	return !isDead;
-
 }
 
 bool Rectangle::isInside(double x, double y)
@@ -301,7 +352,7 @@ void Rectangle::checkPinned(double x, double y)
 		// check if (x,y) is inside rectangle ABCD
 		if (isInside(x, y)) {
 			isPinned = true;
-			std::cout << "pinned!" << std::endl;
+			// std::cout << "pinned!" << std::endl;
 		}
 	}
 }
@@ -332,4 +383,24 @@ float Rectangle::getBottom()
 unsigned Rectangle::getID()
 {
 	return id;
+}
+
+glm::vec4 Rectangle::getVertexA()
+{
+	return vertexa;
+}
+
+glm::vec4 Rectangle::getVertexB()
+{
+	return vertexb;
+}
+
+glm::vec4 Rectangle::getVertexC()
+{
+	return vertexc;
+}
+
+glm::vec4 Rectangle::getVertexD()
+{
+	return vertexd;
 }
