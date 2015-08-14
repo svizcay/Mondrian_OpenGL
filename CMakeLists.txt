@@ -515,22 +515,25 @@ create_target_launcher(tutorial03_matrices WORKING_DIRECTORY "${CMAKE_CURRENT_SO
 # # Xcode and Visual working directories
 # set_target_properties(tutorial17_rotations PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tutorial17_rotations/")
 # create_target_launcher(tutorial17_rotations WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial17_rotations/")
-# 
-# # User playground
-# add_executable(playground 
-# 	playground/playground.cpp
-# 	common/shader.cpp
-# 	common/shader.hpp
-# )
-# target_link_libraries(playground
-# 	${ALL_LIBS}
-# )
-# # Xcode and Visual working directories
-# set_target_properties(playground PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
-# create_target_launcher(playground WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
-# 
-# 
-# 
+
+# User playground
+add_executable(playground 
+	playground/playground.cpp
+	common/shader.cpp
+	common/shader.hpp
+
+	playground/vertex.glsl
+	playground/fragment.glsl
+)
+target_link_libraries(playground
+	${ALL_LIBS} SOIL
+)
+# Xcode and Visual working directories
+set_target_properties(playground PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+create_target_launcher(playground WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/playground/")
+
+
+
 # # Misc 5, with glReadPixels
 # add_executable(misc05_picking_slow_easy
 # 	misc05_picking/misc05_picking_slow_easy.cpp
@@ -756,10 +759,10 @@ add_custom_command(
 #    TARGET tutorial18_particles POST_BUILD
 #    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/tutorial18_particles${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/tutorial18_billboards_and_particles/"
 # )
-# add_custom_command(
-#    TARGET playground POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/playground${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/playground/"
-# )
+add_custom_command(
+   TARGET playground POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/playground${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/playground/"
+)
 # add_custom_command(
 #    TARGET misc05_picking_slow_easy POST_BUILD
 #    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/misc05_picking_slow_easy${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/"

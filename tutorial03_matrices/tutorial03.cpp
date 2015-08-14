@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <iomanip>		// std::setw
 
 void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 void updateFPSCounter(GLFWwindow * window);
@@ -110,7 +111,24 @@ int main( void )
 	glBindVertexArray(rectangleVAO);
 
 	// left, right, bottom, top, angle1, angle2
-	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,1.0f,100.0f); // In world coordinates
+	// glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f,0.0001f,10.0f); // In world coordinates
+	glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f); // In world coordinates
+	for (unsigned row = 0; row < 4; row++) {
+		for (unsigned col = 0; col < 4; col++) {
+			std::cout << std::setw(10) << Projection[col][row] << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	glm::vec4 testvertex;
+	for (int i = -10; i <= 10; i++) {
+		testvertex = glm::vec4(1.0);
+		testvertex.z = i;
+		testvertex = Projection * testvertex;
+		std::cout << "z = " << std::setw(3) << i << " " << testvertex.z << std::endl;
+	}
+	std::cout << std::endl;
+
 	// glm::mat4 Projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f,1.0f,100.0f); // In world coordinates
 	/*
 	glm::mat4 Projection = glm::perspective(
@@ -121,12 +139,25 @@ int main( void )
 	);		
 	*/
 	// Camera matrix
+	/*
+	 * view es una matriz cuadrada almacenada por columnas (no por filas)
+	 * al poner la camara mirando al origen en una posicion z=2 (positivo),
+	 * lo que hace, es generar una matriz de transformación que moverá el objeto
+	 * en el eje z dos unidades de "w" */
 	glm::mat4 View = glm::lookAt(
 		glm::vec3(0,0,2), // Camera is at (4,3,3), in World Space
 		glm::vec3(0,0,0), // and looks at the origin
 		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 	);
 	// glm::mat4 View = glm::mat4(1.0f);
+	/*
+	for (unsigned row = 0; row < 4; row++) {
+		for (unsigned col = 0; col < 4; col++) {
+			std::cout << std::setw(3) << View[col][row] << " ";
+		}
+		std::cout << std::endl;
+	}
+	*/
 
 	GLuint rectangleVertexBuffer;
 	glGenBuffers(1, &rectangleVertexBuffer);
