@@ -334,13 +334,47 @@ bool Rectangle::isInside(double worldx, double worldy)
 	bool inRow = false;
 	bool inCol = false;
 
-	if (left <= worldx && worldx <= right) {
+	if (left < worldx && worldx < right) {
 		inCol = true;
 	}
 
-	if (bottom <= worldy && worldy <= top) {
+	if (bottom < worldy && worldy < top) {
 		inRow = true;
 	}
 
 	return (inRow && inCol);
 }
+
+bool Rectangle::getIsPinned()
+{
+	return isPinned;
+}
+
+GLfloat Rectangle::getLeft()
+{
+	glm::vec2 halfSize = size / 2.0f;
+	GLfloat left	=	(position - halfSize).x;
+	return left;
+}
+
+GLfloat Rectangle::getRight()
+{
+	glm::vec2 halfSize = size / 2.0f;
+	GLfloat right	=	(position + halfSize).x;
+	return right;
+}
+
+GLfloat Rectangle::getBottom()
+{
+	glm::vec2 halfSize = size / 2.0f;
+	GLfloat bottom	=	(position - halfSize).y;
+	return bottom;
+}
+
+GLfloat Rectangle::getTop()
+{
+	glm::vec2 halfSize = size / 2.0f;
+	GLfloat top		=	(position + halfSize).y;
+	return top;
+}
+

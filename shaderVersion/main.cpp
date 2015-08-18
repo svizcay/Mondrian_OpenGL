@@ -41,18 +41,14 @@ const double LINE_THICKNESS = 0.1;
 const int INVALID_POSITION = 100;
 
 Rectangles rectangles (worldWidth, worldHeight,
-		MAX_NR_RECTANGLES, MAX_SIZE, INVALID_POSITION
+		MAX_NR_RECTANGLES, MAX_SIZE, INVALID_POSITION,
+		LINE_THICKNESS
 );
 
 int main( void )
 {
-	// std::vector<Rectangle> test;
-	// Rectangle rectangle (20, 20);
-	// test.push_back(rectangle);
-
 	// init random seed equal to current time
 	std::srand(std::time(0));
-
 
 	const GLfloat basicQuad[] = {
 		-1.0f,	 1.0f,		// top left
@@ -162,7 +158,7 @@ int main( void )
 		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 2500 == 0 && !endSimulation) {
+		if (simulationTime % 500 == 0 && !endSimulation) {
 			rectangles.createOne();
 		}
 
@@ -174,20 +170,6 @@ int main( void )
 		rectangles.getSizes(sizes);
 		rectangles.getColors(colors);
 
-		// std::cout << "nr rectangles: " << rectangles.size() << std::endl;
-		// std::cout << "positions: " << std::endl;
-		// for (unsigned i = 0; i < rectangles.size(); i++) {
-		// 	std::cout << positions[i*2] << " " << positions[i*2+1] << std::endl;
-		// }
-		// std::cout << "sizes: " << std::endl;
-		// for (unsigned i = 0; i < rectangles.size(); i++) {
-		// 	std::cout << sizes[i*2] << " " << sizes[i*2+1] << std::endl;
-		// }
-		// std::cout << "colors: " << std::endl;
-		// for (unsigned i = 0; i < rectangles.size(); i++) {
-		// 	std::cout << colors[i*3] << " " << colors[i*3+1] << " " << colors[i*3+2] << std::endl;
-		// }
-
 		// transfer data to uniforms
 		glUniform2f(windowSizeLoc, windowWidth, windowHeight);
 		glUniform2fv(positionsLoc, MAX_NR_RECTANGLES, positions);
@@ -196,22 +178,6 @@ int main( void )
 
 		// draw rectangles
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // 3 indices starting at 0 -> 1 triangle
-
-
-		/*
-		if (endSimulation && !justEnded) {
-			glUseProgram(lineProgram);
-			glBindVertexArray(lineVAO);
-			// std::cout << "drawing lines..." << std::endl;
-			glDrawArrays(GL_TRIANGLES, 0, nrLines * 2 * 3); // 3 indices starting at 0 -> 1 triangle
-		}
-		*/
-
-		/*
-		if (endSimulation && justEnded) {
-
-		}
-		*/
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -267,6 +233,7 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
 		endSimulation = true;
+		rectangles.finish();
 		std::cout << "right click" << std::endl;
 	}
 }

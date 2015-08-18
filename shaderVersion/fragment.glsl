@@ -52,10 +52,10 @@ void main()
 		vertexD *= sizes[i];
 
 		// translate
-		vertexA += positions[i];
-		vertexB += positions[i];
-		vertexC += positions[i];
-		vertexD += positions[i];
+		vertexA += positions[i].xy;
+		vertexB += positions[i].xy;
+		vertexC += positions[i].xy;
+		vertexD += positions[i].xy;
 
 		// orthographic projection
 		// it will be drawn only if vertex is inside [-1:1]

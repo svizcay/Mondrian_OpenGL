@@ -14,6 +14,12 @@ public:
 	bool isAlive();
 	void tryToKill();
 	void checkPinned(double worldx, double worldy);
+	bool getIsPinned();
+	GLfloat getLeft();
+	GLfloat getRight();
+	GLfloat getBottom();
+	GLfloat getTop();
+	
 
 private:
 	// global parameters

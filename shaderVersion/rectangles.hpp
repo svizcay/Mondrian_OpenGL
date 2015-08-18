@@ -10,8 +10,11 @@ public:
 	Rectangles(
 			int worldWidth, int worldHeight,
 			unsigned maxNrRectangles, unsigned maxSize,
-			unsigned invalidPosition
+			unsigned invalidPosition,
+			double lineThickness
 	);
+
+	~Rectangles();
 
 	void createOne();
 	void update();
@@ -19,6 +22,7 @@ public:
 	void getColors(GLfloat *colors);
 	void getSizes(GLfloat *sizes);
 	int size();
+	void finish();
 	void checkPinned(double worldx, double worldy);
 
 private:
@@ -37,6 +41,13 @@ private:
 
 	// inner storage
 	std::vector<Rectangle> rectangles;
+
+	// end simulation: draw lines
+	bool ended;
+	unsigned nrLines;
+	GLfloat *linesPositions;
+	GLfloat *linesSizes;
+	double _LINE_THICKNESS;
 
 };
 
