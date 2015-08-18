@@ -82,6 +82,27 @@ add_definitions(
 # create_target_launcher(tutorial02_red_triangle WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial02_red_triangle/")
 # create_default_target_launcher(tutorial02_red_triangle WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial02_red_triangle/") # tut 1 is not the default or people would complain that tut 2 doesn't work
 
+# shader version
+add_executable(shaderVersion
+	shaderVersion/main.cpp
+	shaderVersion/rectangles.cpp
+	shaderVersion/rectangles.hpp
+	shaderVersion/rectangle.cpp
+	shaderVersion/rectangle.hpp
+	common/shader.cpp
+	common/shader.hpp
+
+	shaderVersion/vertex.glsl
+	shaderVersion/fragment.glsl
+)
+#set_target_properties(tutorial03_matrices PROPERTIES RUNTIME_OUTPUT_DIRECTORY /test1)
+target_link_libraries(shaderVersion
+	${ALL_LIBS}
+)
+# Xcode and Visual working directories
+set_target_properties(shaderVersion PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaderVersion/")
+create_target_launcher(shaderVersion WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaderVersion/") # Visual
+
 # Tutorial 3
 add_executable(tutorial03_matrices 
 	tutorial03_matrices/tutorial03.cpp
@@ -759,6 +780,10 @@ add_custom_command(
 #    TARGET misc05_picking_BulletPhysics POST_BUILD
 #    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/misc05_picking_BulletPhysics${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/misc05_picking/"
 # )
+add_custom_command(
+   TARGET shaderVersion POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/shaderVersion${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_CURRENT_SOURCE_DIR}/shaderVersion/"
+)
 
 elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
 
