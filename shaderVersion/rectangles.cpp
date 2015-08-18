@@ -1,5 +1,7 @@
 #include "rectangles.hpp"
 #include <iostream>
+#include <GL/glew.h>
+#include <glfw3.h>
 
 Rectangles::Rectangles(
 			int worldWidth, int worldHeight,
@@ -108,9 +110,16 @@ void Rectangles::getSizes(GLfloat *sizes)
 
 	// if ended add lines
 	if (ended) {
+		static double timeStart = glfwGetTime();
+		double timeEnd = glfwGetTime();
+		double elapsedTime = timeEnd - timeStart;
+		double speed = 1;
+		double animationScale = speed * elapsedTime;
+		if (animationScale > 1) animationScale = 1;
+
 		for (unsigned i = 0; i < nrLines; i++) {
-			sizes[counter++] = linesSizes[i*2+0];
-			sizes[counter++] = linesSizes[i*2+1];
+			sizes[counter++] = linesSizes[i*2+0] * animationScale;
+			sizes[counter++] = linesSizes[i*2+1] * animationScale;
 		}
 	}
 
