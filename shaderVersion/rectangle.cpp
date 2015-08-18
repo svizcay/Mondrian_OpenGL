@@ -28,6 +28,7 @@ Rectangle::Rectangle(int worldWidth, int worldHeight):
 	color = getRandomColor();			// set it random among fixed values
 
 	isPinned = false;
+	isTotallyPositioned = false;
 	isDead = false;
 
 	previousTime = glfwGetTime();
@@ -98,6 +99,123 @@ glm::vec3 Rectangle::getRandomColor()
 	}
 }
 
+// checkpoint at each .05 value in the grid
+void Rectangle::setPositionNearestCheckpoint()
+{
+	int floor;
+	int ceil;
+
+	double checkpointLeft;
+	double checkpointRight;
+
+	double distanceLeft;
+	double distanceRight;
+
+	switch (spawningSite) {
+		case 0:	// from left to right
+			{
+			floor = std::floor(position.x);
+			ceil = std::ceil(position.x);
+			if (floor == ceil) {
+				position.x = floor + 0.5;
+
+			} else {
+				if (position.x - floor > 0.5) {
+					checkpointLeft = floor + 0.5;
+					checkpointRight = ceil + 0.5;
+				} else {
+					checkpointLeft = floor - 0.5;
+					checkpointRight = floor + 0.5;
+				}
+				distanceLeft = position.x - checkpointLeft;
+				distanceRight = checkpointRight - position.x;
+				if (distanceLeft < distanceRight) {
+					position.x = checkpointLeft;
+				} else {
+					position.x = checkpointRight;
+				}
+			}
+			break;
+			}
+		case 1:	// from bottom to top
+			{
+			floor = std::floor(position.y);
+			ceil = std::ceil(position.y);
+			if (floor == ceil) {
+				position.y = floor + 0.5;
+
+			} else {
+				if (position.y - floor > 0.5) {
+					checkpointLeft = floor + 0.5;
+					checkpointRight = ceil + 0.5;
+				} else {
+					checkpointLeft = floor - 0.5;
+					checkpointRight = floor + 0.5;
+				}
+				distanceLeft = position.y - checkpointLeft;
+				distanceRight = checkpointRight - position.y;
+				if (distanceLeft < distanceRight) {
+					position.y = checkpointLeft;
+				} else {
+					position.y = checkpointRight;
+				}
+			}
+			break;
+			}
+		case 2: // from right to left
+			{
+			floor = std::floor(position.x);
+			ceil = std::ceil(position.x);
+			if (floor == ceil) {
+				position.x = floor - 0.5;
+			} else {
+				if (ceil - position.x > 0.5) {
+					checkpointLeft = floor - 0.5;
+					checkpointRight = ceil - 0.5;
+				} else {
+					checkpointLeft = ceil - 0.5;
+					checkpointRight = ceil + 0.5;
+				}
+				distanceLeft = position.x - checkpointLeft;
+				distanceRight = checkpointRight - position.x;
+				if (distanceLeft < distanceRight) {
+					position.x = checkpointLeft;
+				} else {
+					position.x = checkpointRight;
+				}
+			}
+			break;
+			}
+		case 3:	// from top to bottom
+			{
+			floor = std::floor(position.y);
+			ceil = std::ceil(position.y);
+			if (floor == ceil) {
+				position.y = floor - 0.5;
+			} else {
+				if (ceil - position.y > 0.5) {
+					checkpointLeft = floor - 0.5;
+					checkpointRight = ceil - 0.5;
+				} else {
+					checkpointLeft = ceil - 0.5;
+					checkpointRight = ceil + 0.5;
+				}
+				distanceLeft = position.y - checkpointLeft;
+				distanceRight = checkpointRight - position.y;
+				if (distanceLeft < distanceRight) {
+					position.y = checkpointLeft;
+				} else {
+					position.y = checkpointRight;
+				}
+			}
+			break;
+			}
+		default:
+			std::cerr << "ERROR: wrong value" << std::endl;
+
+	}
+}
+
 void Rectangle::updatePosition()
 {
 
@@ -111,23 +229,31 @@ void Rectangle::updatePosition()
 	// TODO: make speed a static variable
 	double speed = 7.5;
 	double translation = speed * deltaTime;
-	if (!isPinned) {
-		switch (spawningSite) {
-			case 0:	// from left to right
-				position += glm::vec2(translation, 0);
-				break;
-			case 1:	// from bottom to top
-				position += glm::vec2(0, translation);
-				break;
-			case 2: // from right to left
-				position += glm::vec2(-translation, 0);
-				break;
-			case 3:	// from top to bottom
-				position += glm::vec2(0, -translation);
-				break;
-			default:
-				std::cerr << "ERROR: wrong value" << std::endl;
+	if (!isTotallyPositioned) {
+		// rectangle is still moving
+		if (!isPinned) {
+			// use normal speed
+			switch (spawningSite) {
+				case 0:	// from left to right
+					position += glm::vec2(translation, 0);
+					break;
+				case 1:	// from bottom to top
+					position += glm::vec2(0, translation);
+					break;
+				case 2: // from right to left
+					position += glm::vec2(-translation, 0);
+					break;
+				case 3:	// from top to bottom
+					position += glm::vec2(0, -translation);
+					break;
+				default:
+					std::cerr << "ERROR: wrong value" << std::endl;
 
+			}
+		} else {
+			// rectangle was pinned but needs to go to its final position
+			isTotallyPositioned = true;
+			setPositionNearestCheckpoint();
 		}
 	}
 }
@@ -185,4 +311,36 @@ glm::vec3 Rectangle::getColor()
 bool Rectangle::isAlive()
 {
 	return !isDead;
+}
+
+void Rectangle::checkPinned(double worldx, double worldy)
+{
+	if (!isPinned) {
+		// check if (x,y) is inside rectangle ABCD
+		if (isInside(worldx, worldy)) {
+			isPinned = true;
+		}
+	}
+}
+
+bool Rectangle::isInside(double worldx, double worldy)
+{
+	glm::vec2 halfSize = size / 2.0f;
+	GLfloat left	=	(position - halfSize).x;
+	GLfloat right	=	(position + halfSize).x;
+	GLfloat bottom	=	(position - halfSize).y;
+	GLfloat top		=	(position + halfSize).y;
+
+	bool inRow = false;
+	bool inCol = false;
+
+	if (left <= worldx && worldx <= right) {
+		inCol = true;
+	}
+
+	if (bottom <= worldy && worldy <= top) {
+		inRow = true;
+	}
+
+	return (inRow && inCol);
 }

@@ -13,6 +13,7 @@ public:
 	glm::vec3 getColor();
 	bool isAlive();
 	void tryToKill();
+	void checkPinned(double worldx, double worldy);
 
 private:
 	// global parameters
@@ -33,11 +34,15 @@ private:
 	unsigned spawningSite;			// 0:left; 1:botton; 2:right; 3:top
 
 	bool isPinned;
+	bool isTotallyPositioned;
 	bool isDead;
 
 	glm::vec3 getRandomColor();
 	glm::vec2 getRandomSize();
 	glm::vec2 getInitialPosition();
+	void setPositionNearestCheckpoint();
+
+	bool isInside(double worldx, double worldy);
 
 	/*
 	bool isInside(double x, double y);

@@ -86,3 +86,10 @@ int Rectangles::size()
 {
 	return rectangles.size();
 }
+
+void Rectangles::checkPinned(double worldx, double worldy)
+{
+	for (unsigned i = 0; i < rectangles.size(); i++) {
+		rectangles[i].checkPinned(worldx, worldy);
+	}
+}

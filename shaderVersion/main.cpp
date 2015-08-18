@@ -35,6 +35,15 @@ bool endSimulation = false;
 const int worldWidth = 20;
 const int worldHeight = 20;
 
+const unsigned MAX_NR_RECTANGLES = 100;
+const unsigned MAX_SIZE = 10;
+const double LINE_THICKNESS = 0.1;
+const int INVALID_POSITION = 100;
+
+Rectangles rectangles (worldWidth, worldHeight,
+		MAX_NR_RECTANGLES, MAX_SIZE, INVALID_POSITION
+);
+
 int main( void )
 {
 	// std::vector<Rectangle> test;
@@ -44,10 +53,6 @@ int main( void )
 	// init random seed equal to current time
 	std::srand(std::time(0));
 
-	const unsigned MAX_NR_RECTANGLES = 100;
-	const unsigned MAX_SIZE = 10;
-	const double LINE_THICKNESS = 0.1;
-	const int INVALID_POSITION = 100;
 
 	const GLfloat basicQuad[] = {
 		-1.0f,	 1.0f,		// top left
@@ -63,9 +68,6 @@ int main( void )
 	// MAX_NR_RECTANGLES colors (r,g,b)
 	GLfloat colors[MAX_NR_RECTANGLES * 3];
 
-	Rectangles rectangles (worldWidth, worldHeight,
-			MAX_NR_RECTANGLES, MAX_SIZE, INVALID_POSITION
-	);
 
 	// windows size
 	int windowWidth = 600;
@@ -244,19 +246,23 @@ void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
 		// normalized device coordinates
 		double ndcx = 2.0 * xpos / windowWidth - 1.0;
 		double ndcy = 1.0 - (2.0 * ypos) / windowHeight;
+		// std::cout << "ndc (" << ndcx << "," << ndcy << ")" << std::endl;
 
 		// world coordinates
-		double worldx = ndcx * worldWidth;
-		double worldy = ndcy * worldHeight;
+		double worldx = ndcx * worldWidth / 2;
+		double worldy = ndcy * worldHeight / 2;
 
-		// std::cout << "(" << worldx << "," << worldy << ")" << std::endl;
+		// std::cout << "world (" << worldx << "," << worldy << ")" << std::endl;
 		// usleep(3000000);
+
+
 
 		/*
 		for (unsigned i = 0; i < rectangles.size(); i++) {
 			rectangles[i].checkPinned(worldx, worldy);
 		}
 		*/
+		rectangles.checkPinned(worldx, worldy);
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {

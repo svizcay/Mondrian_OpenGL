@@ -19,6 +19,7 @@ public:
 	void getColors(GLfloat *colors);
 	void getSizes(GLfloat *sizes);
 	int size();
+	void checkPinned(double worldx, double worldy);
 
 private:
 	// world space
