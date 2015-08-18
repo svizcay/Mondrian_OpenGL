@@ -148,8 +148,10 @@ void Rectangles::finish()
 			glm::vec2 position;
 
 			// for each vertical edge
-			position.x = rectangles[i].getLeft();
 			glm::vec2 rectanglePosition = rectangles[i].getPosition();
+
+			// left edge
+			position.x = rectangles[i].getLeft();
 			top = 10;
 			bottom = -10;
 			for (unsigned j = 0; j < rectangles.size(); j++) {
@@ -164,14 +166,85 @@ void Rectangles::finish()
 					}
 				}
 			}
-			std::cout << "rectangle " << i << std::endl;
-			std::cout << "position (center): " << position.x << " " << (top + bottom) / 2 << std::endl;
-			std::cout << "bottom & top (world): " << bottom << " " << top << std::endl;
 			linesPositions[counter] = position.x;
 			linesSizes[counter] = _LINE_THICKNESS;
 			counter++;
 			linesPositions[counter] = (top + bottom) / 2;
 			linesSizes[counter] = (top - bottom);
+			counter++;
+			nrLines++;
+
+			// right edge
+			position.x = rectangles[i].getRight();
+			top = 10;
+			bottom = -10;
+			for (unsigned j = 0; j < rectangles.size(); j++) {
+				if (j != i && rectangles[j].getIsPinned()) {
+					float otherRectangleLeft = rectangles[j].getLeft();
+					float otherRectangleRight = rectangles[j].getRight();
+					float otherRectangleBottom = rectangles[j].getBottom();
+					float otherRectangleTop = rectangles[j].getTop();
+					if (otherRectangleLeft < position.x && position.x < otherRectangleRight) {
+						if (otherRectangleBottom > rectanglePosition.y && otherRectangleBottom < top) top = otherRectangleBottom;
+						if (otherRectangleTop < rectanglePosition.y && otherRectangleTop > bottom) bottom = otherRectangleTop;
+					}
+				}
+			}
+			linesPositions[counter] = position.x;
+			linesSizes[counter] = _LINE_THICKNESS;
+			counter++;
+			linesPositions[counter] = (top + bottom) / 2;
+			linesSizes[counter] = (top - bottom);
+			counter++;
+			nrLines++;
+
+			// for each horizontal edge
+
+			// bottom edge
+			position.y = rectangles[i].getBottom();
+			left = -10;
+			right = 10;
+			for (unsigned j = 0; j < rectangles.size(); j++) {
+				if (j != i && rectangles[j].getIsPinned()) {
+					float otherRectangleLeft = rectangles[j].getLeft();
+					float otherRectangleRight = rectangles[j].getRight();
+					float otherRectangleBottom = rectangles[j].getBottom();
+					float otherRectangleTop = rectangles[j].getTop();
+					if (otherRectangleBottom < position.y && position.y < otherRectangleTop) {
+						if (otherRectangleLeft > rectanglePosition.x && otherRectangleLeft < right) right = otherRectangleLeft;
+						if (otherRectangleRight < rectanglePosition.x && otherRectangleRight > left) left = otherRectangleRight;
+					}
+				}
+			}
+			linesPositions[counter] = (right + left) / 2;
+			linesSizes[counter] = (right - left);
+			counter++;
+			linesPositions[counter] = position.y;
+			linesSizes[counter] = _LINE_THICKNESS;
+			counter++;
+			nrLines++;
+
+			// top edge
+			position.y = rectangles[i].getTop();
+			left = -10;
+			right = 10;
+			for (unsigned j = 0; j < rectangles.size(); j++) {
+				if (j != i && rectangles[j].getIsPinned()) {
+					float otherRectangleLeft = rectangles[j].getLeft();
+					float otherRectangleRight = rectangles[j].getRight();
+					float otherRectangleBottom = rectangles[j].getBottom();
+					float otherRectangleTop = rectangles[j].getTop();
+					if (otherRectangleBottom < position.y && position.y < otherRectangleTop) {
+						if (otherRectangleLeft > rectanglePosition.x && otherRectangleLeft < right) right = otherRectangleLeft;
+						if (otherRectangleRight < rectanglePosition.x && otherRectangleRight > left) left = otherRectangleRight;
+					}
+				}
+			}
+			linesPositions[counter] = (right + left) / 2;
+			linesSizes[counter] = (right - left);
+			counter++;
+			linesPositions[counter] = position.y;
+			linesSizes[counter] = _LINE_THICKNESS;
 			counter++;
 			nrLines++;
 		}
