@@ -3,3 +3,5 @@
 *.exe
 build/
 tutorial03_matrices/tutorial03_matrices
+playground/playground
+shaderVersion/shaderVersion
