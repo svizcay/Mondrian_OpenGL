@@ -49,6 +49,9 @@ private:
 	GLfloat *linesSizes;
 	double _LINE_THICKNESS;
 
+	bool *animationStarted;
+	double *animationStart;
+
 };
 
 #endif

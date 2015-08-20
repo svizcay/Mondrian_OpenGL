@@ -24,11 +24,17 @@ Rectangles::Rectangles(
 	linesPositions = new GLfloat[maxNrRectangles * 4];
 	linesSizes = new GLfloat[maxNrRectangles * 4];
 
+	animationStarted = NULL;
+	animationStart = NULL;
+
 }
 
 Rectangles::~Rectangles() {
 	delete [] linesPositions;
 	delete [] linesSizes;
+
+	delete [] animationStarted;
+	delete [] animationStart;
 }
 
 void Rectangles::createOne()
@@ -114,12 +120,31 @@ void Rectangles::getSizes(GLfloat *sizes)
 		double timeEnd = glfwGetTime();
 		double elapsedTime = timeEnd - timeStart;
 		double speed = 1;
-		double animationScale = speed * elapsedTime;
-		if (animationScale > 1) animationScale = 1;
+		// double animationScale = speed * elapsedTime;
+		// if (animationScale > 1) animationScale = 1;
 
 		for (unsigned i = 0; i < nrLines; i++) {
-			sizes[counter++] = linesSizes[i*2+0] * animationScale;
-			sizes[counter++] = linesSizes[i*2+1] * animationScale;
+			if (elapsedTime > i / 2.0) {
+				if (!animationStarted[i]) {
+					animationStart[i] = glfwGetTime();
+					animationStarted[i] = true;
+				}
+
+				double animationElapsedTime = glfwGetTime() - animationStart[i];
+				double animationScale = speed * animationElapsedTime;
+				if (animationScale > 1) animationScale = 1;
+
+				sizes[counter++] = linesSizes[i*2+0] * animationScale;
+				sizes[counter++] = linesSizes[i*2+1] * animationScale;
+
+				// if (elapsedTime > i) {
+				// 	sizes[counter++] = linesSizes[i*2+0];
+				// 	sizes[counter++] = linesSizes[i*2+1];
+				// }
+			} else {
+				sizes[counter++] = 0;
+				sizes[counter++] = 0;
+			}
 		}
 	}
 
@@ -257,6 +282,12 @@ void Rectangles::finish()
 			counter++;
 			nrLines++;
 		}
+	}
+
+	animationStarted = new bool[nrLines];
+	animationStart = new double[nrLines];
+	for (unsigned i = 0; i < nrLines; i++) {
+		animationStarted[i] = false;
 	}
 }
 
