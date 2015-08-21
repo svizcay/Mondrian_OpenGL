@@ -137,10 +137,6 @@ void Rectangles::getSizes(GLfloat *sizes)
 				sizes[counter++] = linesSizes[i*2+0] * animationScale;
 				sizes[counter++] = linesSizes[i*2+1] * animationScale;
 
-				// if (elapsedTime > i) {
-				// 	sizes[counter++] = linesSizes[i*2+0];
-				// 	sizes[counter++] = linesSizes[i*2+1];
-				// }
 			} else {
 				sizes[counter++] = 0;
 				sizes[counter++] = 0;
@@ -149,9 +145,31 @@ void Rectangles::getSizes(GLfloat *sizes)
 	}
 
 	for(unsigned i = 0; i < rectangles.size(); i++) {
+		if (rectangles[i].getIsJustPinned()) {
+			onClickAnimationStart[rectangles[i].getID()] = glfwGetTime();
+			rectangles[i].animationAlreadyStarted();
+		}
+
+		double animationScale = 1;
+		double ANIMATION_MAX_TIME = 0.3;
+		double ANIMATION_MAX_SCALE = 1.1;
+		double ANIMATION_HALF_TIME = ANIMATION_MAX_TIME / 2.0;
+
+		if (onClickAnimationStart.find(rectangles[i].getID()) != onClickAnimationStart.end()) {
+			// animation started
+			double elapsedTime = glfwGetTime() - onClickAnimationStart[rectangles[i].getID()];
+			if (elapsedTime < ANIMATION_HALF_TIME) {
+				animationScale = elapsedTime * (ANIMATION_MAX_SCALE - 1) / ANIMATION_HALF_TIME + 1;
+			} else if (elapsedTime >= ANIMATION_HALF_TIME && elapsedTime < ANIMATION_MAX_TIME) {
+				animationScale = (ANIMATION_MAX_SCALE - 1) * (elapsedTime - ANIMATION_MAX_TIME) / (ANIMATION_HALF_TIME - ANIMATION_MAX_TIME) + 1;
+			} else {
+				animationScale = 1;
+			}
+
+		}
 		glm::vec2 size = rectangles[i].getSize();
-		sizes[counter++] = size.x;
-		sizes[counter++] = size.y;
+		sizes[counter++] = size.x * animationScale;
+		sizes[counter++] = size.y * animationScale;
 	}
 }
 

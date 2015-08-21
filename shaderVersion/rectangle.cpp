@@ -37,6 +37,11 @@ Rectangle::Rectangle(int worldWidth, int worldHeight):
 	counter++;
 }
 
+unsigned Rectangle::getID()
+{
+	return id;
+}
+
 glm::vec2 Rectangle::getInitialPosition()
 {
 	// select one among left, bottom, right, top
@@ -227,7 +232,7 @@ void Rectangle::updatePosition()
 	 */
 	previousTime = currentTime;
 	// TODO: make speed a static variable
-	double speed = 7.5;
+	double speed = 10;
 	double translation = speed * deltaTime;
 	if (!isTotallyPositioned) {
 		// rectangle is still moving
@@ -319,6 +324,7 @@ void Rectangle::checkPinned(double worldx, double worldy)
 		// check if (x,y) is inside rectangle ABCD
 		if (isInside(worldx, worldy)) {
 			isPinned = true;
+			justPinned = true;
 		}
 	}
 }
@@ -378,3 +384,12 @@ GLfloat Rectangle::getTop()
 	return top;
 }
 
+bool Rectangle::getIsJustPinned()
+{
+	return justPinned;
+}
+
+void Rectangle::animationAlreadyStarted()
+{
+	justPinned = false;
+}

@@ -11,10 +11,13 @@ public:
 	glm::vec2 getPosition();
 	glm::vec2 getSize();
 	glm::vec3 getColor();
+	unsigned getID();
 	bool isAlive();
 	void tryToKill();
 	void checkPinned(double worldx, double worldy);
 	bool getIsPinned();
+	bool getIsJustPinned();
+	void animationAlreadyStarted();
 	GLfloat getLeft();
 	GLfloat getRight();
 	GLfloat getBottom();
@@ -42,6 +45,7 @@ private:
 	bool isPinned;
 	bool isTotallyPositioned;
 	bool isDead;
+	bool justPinned;
 
 	glm::vec3 getRandomColor();
 	glm::vec2 getRandomSize();

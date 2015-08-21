@@ -2,6 +2,7 @@
 #define RECTANGLES_HPP
 
 #include <vector>
+#include <map>
 #include <GL/glew.h>
 #include "rectangle.hpp"
 
@@ -51,6 +52,9 @@ private:
 
 	bool *animationStarted;
 	double *animationStart;
+
+	// animate rectangle onClick
+	std::map<unsigned, double>onClickAnimationStart;	// key: rectangle's id; value: start time
 
 };
 
