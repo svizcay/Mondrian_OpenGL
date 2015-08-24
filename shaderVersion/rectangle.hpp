@@ -22,6 +22,7 @@ public:
 	GLfloat getRight();
 	GLfloat getBottom();
 	GLfloat getTop();
+	bool checkCollision(Rectangle other);
 	
 
 private:

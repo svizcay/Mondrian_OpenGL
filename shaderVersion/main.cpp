@@ -158,7 +158,7 @@ int main( void )
 		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 100 == 0 && !endSimulation) {
+		if (simulationTime % 4000 == 0 && !endSimulation) {
 			rectangles.createOne();
 		}
 

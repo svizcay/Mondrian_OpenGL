@@ -21,8 +21,9 @@ Rectangles::Rectangles(
 	ended = false;
 	nrLines = 0;
 
-	linesPositions = new GLfloat[maxNrRectangles * 4];
-	linesSizes = new GLfloat[maxNrRectangles * 4];
+	// each edge might generate 2 lines
+	linesPositions = new GLfloat[maxNrRectangles * 4 * 2];
+	linesSizes = new GLfloat[maxNrRectangles * 4 * 2];
 
 	animationStarted = NULL;
 	animationStart = NULL;
@@ -124,7 +125,7 @@ void Rectangles::getSizes(GLfloat *sizes)
 		// if (animationScale > 1) animationScale = 1;
 
 		for (unsigned i = 0; i < nrLines; i++) {
-			if (elapsedTime > i / 2.0) {
+			if (elapsedTime > i / 4.0) {
 				if (!animationStarted[i]) {
 					animationStart[i] = glfwGetTime();
 					animationStarted[i] = true;
@@ -185,122 +186,218 @@ void Rectangles::checkPinned(double worldx, double worldy)
 	}
 }
 
+void Rectangles::createVerticalLine(unsigned rectangleIndex, glm::vec2 linePosition)
+{
+
+	// line's top, bottom, left, right
+	float left		= -10;
+	float right		=  10;
+	float bottom	= -10;
+	float top		=  10;
+
+	float rectangleLeft		= rectangles[rectangleIndex].getLeft();
+	float rectangleRight	= rectangles[rectangleIndex].getRight();
+	float rectangleBottom	= rectangles[rectangleIndex].getBottom();
+	float rectangleTop		= rectangles[rectangleIndex].getTop();
+
+	for (unsigned j = 0; j < rectangles.size(); j++) {
+		if (j != rectangleIndex && rectangles[j].getIsPinned()) {
+			float otherRectangleLeft	= rectangles[j].getLeft();
+			float otherRectangleRight	= rectangles[j].getRight();
+			float otherRectangleBottom	= rectangles[j].getBottom();
+			float otherRectangleTop		= rectangles[j].getTop();
+
+			// check collision between rectangles
+			if (rectangles[rectangleIndex].checkCollision(rectangles[j])) {
+				if (rectangles[rectangleIndex].getID() < rectangles[j].getID()) {
+					// rectangle j is behind current rectangle -> do nothing
+
+				} else {
+					// rectangle j is over current rectangle
+
+					if (otherRectangleLeft < linePosition.x && linePosition.x < otherRectangleRight) {
+						// left edge collision
+
+						// check how many lines should be drawn
+						if (rectangleBottom < otherRectangleBottom && rectangleTop > otherRectangleTop) {
+							// draw two lines
+							std::cout << "drawing two lines!!" << std::endl;
+							// TODO: write this case
+							// currently drawing full line
+
+						} else if (rectangleTop > otherRectangleTop) {
+							// draw one line
+							bottom = otherRectangleTop;
+						} else if (rectangleBottom < otherRectangleBottom) {
+							// draw one line
+							top = otherRectangleBottom;
+						} else {
+							// current edge is totally behind another rectangle
+							// draw nothing
+							// bottom = 10;
+							// top = -10;
+							return;
+						}
+
+					}
+				}
+			} else {
+				// no collision between rectangles rectangleID and j
+				if (otherRectangleLeft < linePosition.x && linePosition.x < otherRectangleRight) {
+					// collision between edge and rectangle j
+					if (otherRectangleBottom >= rectangleTop && otherRectangleBottom < top) top = otherRectangleBottom;
+					if (otherRectangleTop <= rectangleBottom && otherRectangleTop > bottom) bottom = otherRectangleTop;
+				}
+
+			}
+		}
+	}
+
+	addLine(linePosition, bottom, top, true);
+}
+
+void Rectangles::createHorizontalLine(unsigned rectangleIndex, glm::vec2 linePosition)
+{
+
+	// line's top, bottom, left, right
+	float left		= -10;
+	float right		=  10;
+	float bottom	= -10;
+	float top		=  10;
+
+	float rectangleLeft		= rectangles[rectangleIndex].getLeft();
+	float rectangleRight	= rectangles[rectangleIndex].getRight();
+	float rectangleBottom	= rectangles[rectangleIndex].getBottom();
+	float rectangleTop		= rectangles[rectangleIndex].getTop();
+
+	for (unsigned j = 0; j < rectangles.size(); j++) {
+		if (j != rectangleIndex && rectangles[j].getIsPinned()) {
+			float otherRectangleLeft	= rectangles[j].getLeft();
+			float otherRectangleRight	= rectangles[j].getRight();
+			float otherRectangleBottom	= rectangles[j].getBottom();
+			float otherRectangleTop		= rectangles[j].getTop();
+
+			// check collision between rectangles
+			if (rectangles[rectangleIndex].checkCollision(rectangles[j])) {
+				if (rectangles[rectangleIndex].getID() < rectangles[j].getID()) {
+					// rectangle j is behind current rectangle -> do nothing
+
+				} else {
+					// rectangle j is over current rectangle
+
+					if (otherRectangleBottom < linePosition.y && linePosition.y < otherRectangleTop) {
+						// left edge collision
+
+						// check how many lines should be drawn
+						if (rectangleLeft < otherRectangleLeft && rectangleRight > otherRectangleRight) {
+							// draw two lines
+							std::cout << "drawing two lines!!" << std::endl;
+							// TODO: write this case
+							// currently drawing full line
+
+						} else if (rectangleRight > otherRectangleRight) {
+							// draw one line
+							left = otherRectangleRight;
+						} else if (rectangleLeft < otherRectangleLeft) {
+							// draw one line
+							right = otherRectangleLeft;
+						} else {
+							// current edge is totally behind another rectangle
+							// draw nothing
+							// left = 10;
+							// right = -10;
+							return;
+						}
+
+					}
+				}
+			} else {
+				// no collision between rectangles rectangleID and j
+				if (otherRectangleBottom < linePosition.y && linePosition.y < otherRectangleTop) {
+					// collision between edge and rectangle j
+					if (otherRectangleLeft >= rectangleRight && otherRectangleLeft < right) right = otherRectangleLeft;
+					if (otherRectangleRight <= rectangleLeft && otherRectangleRight > left) left = otherRectangleRight;
+				}
+
+			}
+		}
+	}
+
+	addLine(linePosition, left, right, false);
+}
+
+// edge id: 0 = left; 1 = right; 2 = bottom; 3 = top
+void Rectangles::createLines(unsigned rectangleIndex, unsigned edgeID)
+{
+
+	// line's center
+	glm::vec2 linePosition = glm::vec2(0.0f, 0.0f);
+
+	if (edgeID == 0 || edgeID == 1) {
+		// vertical edge
+		
+		if (edgeID == 0) {
+			// left edge
+			linePosition.x = rectangles[rectangleIndex].getLeft();
+		} else {
+			// right edge
+			linePosition.x = rectangles[rectangleIndex].getRight();
+		}
+		createVerticalLine(rectangleIndex, linePosition);
+
+	} else {
+		// horizontal edge
+
+		if (edgeID == 2) {
+			// bottom edge
+			linePosition.y = rectangles[rectangleIndex].getBottom();
+		} else {
+			// top edge
+			linePosition.y = rectangles[rectangleIndex].getTop();
+		}
+		createHorizontalLine(rectangleIndex, linePosition);
+	}
+
+}
+
+void Rectangles::addLine(glm::vec2 linePosition, GLfloat inf, GLfloat sup, bool isVertical)
+{
+	if (isVertical) {
+		linesPositions[nrLines * 2 + 0] = linePosition.x;
+		linesPositions[nrLines * 2 + 1] = (sup + inf) / 2;
+
+		linesSizes[nrLines * 2 + 0] = _LINE_THICKNESS;
+		linesSizes[nrLines * 2 + 1] = (sup - inf);
+	} else {
+		linesPositions[nrLines * 2 + 0] = (sup + inf) / 2;
+		linesPositions[nrLines * 2 + 1] = linePosition.y;
+
+		linesSizes[nrLines * 2 + 0] = (sup - inf);
+		linesSizes[nrLines * 2 + 1] = _LINE_THICKNESS;
+	}
+
+	nrLines++;
+}
+
 void Rectangles::finish()
 {
 	ended = true;
+
 	// calculate lines positions, sizes and nrLines
-	unsigned counter = 0;
 	for(unsigned i = 0; i < rectangles.size(); i++) {
 
 		if (rectangles[i].getIsPinned()) {
 
-			// line top bottom left and right
-			float top, bottom, left, right;
-			// line position
-			glm::vec2 position;
+			// create edges (0:left, 1:right, 2:bottom, 3:top)
+			createLines(i, 0);
+			createLines(i, 1);
+			createLines(i, 2);
+			createLines(i, 3);
 
-			// for each vertical edge
-			glm::vec2 rectanglePosition = rectangles[i].getPosition();
-
-			// left edge
-			position.x = rectangles[i].getLeft();
-			top = 10;
-			bottom = -10;
-			for (unsigned j = 0; j < rectangles.size(); j++) {
-				if (j != i && rectangles[j].getIsPinned()) {
-					float otherRectangleLeft = rectangles[j].getLeft();
-					float otherRectangleRight = rectangles[j].getRight();
-					float otherRectangleBottom = rectangles[j].getBottom();
-					float otherRectangleTop = rectangles[j].getTop();
-					if (otherRectangleLeft < position.x && position.x < otherRectangleRight) {
-						if (otherRectangleBottom > rectanglePosition.y && otherRectangleBottom < top) top = otherRectangleBottom;
-						if (otherRectangleTop < rectanglePosition.y && otherRectangleTop > bottom) bottom = otherRectangleTop;
-					}
-				}
-			}
-			linesPositions[counter] = position.x;
-			linesSizes[counter] = _LINE_THICKNESS;
-			counter++;
-			linesPositions[counter] = (top + bottom) / 2;
-			linesSizes[counter] = (top - bottom);
-			counter++;
-			nrLines++;
-
-			// right edge
-			position.x = rectangles[i].getRight();
-			top = 10;
-			bottom = -10;
-			for (unsigned j = 0; j < rectangles.size(); j++) {
-				if (j != i && rectangles[j].getIsPinned()) {
-					float otherRectangleLeft = rectangles[j].getLeft();
-					float otherRectangleRight = rectangles[j].getRight();
-					float otherRectangleBottom = rectangles[j].getBottom();
-					float otherRectangleTop = rectangles[j].getTop();
-					if (otherRectangleLeft < position.x && position.x < otherRectangleRight) {
-						if (otherRectangleBottom > rectanglePosition.y && otherRectangleBottom < top) top = otherRectangleBottom;
-						if (otherRectangleTop < rectanglePosition.y && otherRectangleTop > bottom) bottom = otherRectangleTop;
-					}
-				}
-			}
-			linesPositions[counter] = position.x;
-			linesSizes[counter] = _LINE_THICKNESS;
-			counter++;
-			linesPositions[counter] = (top + bottom) / 2;
-			linesSizes[counter] = (top - bottom);
-			counter++;
-			nrLines++;
-
-			// for each horizontal edge
-
-			// bottom edge
-			position.y = rectangles[i].getBottom();
-			left = -10;
-			right = 10;
-			for (unsigned j = 0; j < rectangles.size(); j++) {
-				if (j != i && rectangles[j].getIsPinned()) {
-					float otherRectangleLeft = rectangles[j].getLeft();
-					float otherRectangleRight = rectangles[j].getRight();
-					float otherRectangleBottom = rectangles[j].getBottom();
-					float otherRectangleTop = rectangles[j].getTop();
-					if (otherRectangleBottom < position.y && position.y < otherRectangleTop) {
-						if (otherRectangleLeft > rectanglePosition.x && otherRectangleLeft < right) right = otherRectangleLeft;
-						if (otherRectangleRight < rectanglePosition.x && otherRectangleRight > left) left = otherRectangleRight;
-					}
-				}
-			}
-			linesPositions[counter] = (right + left) / 2;
-			linesSizes[counter] = (right - left);
-			counter++;
-			linesPositions[counter] = position.y;
-			linesSizes[counter] = _LINE_THICKNESS;
-			counter++;
-			nrLines++;
-
-			// top edge
-			position.y = rectangles[i].getTop();
-			left = -10;
-			right = 10;
-			for (unsigned j = 0; j < rectangles.size(); j++) {
-				if (j != i && rectangles[j].getIsPinned()) {
-					float otherRectangleLeft = rectangles[j].getLeft();
-					float otherRectangleRight = rectangles[j].getRight();
-					float otherRectangleBottom = rectangles[j].getBottom();
-					float otherRectangleTop = rectangles[j].getTop();
-					if (otherRectangleBottom < position.y && position.y < otherRectangleTop) {
-						if (otherRectangleLeft > rectanglePosition.x && otherRectangleLeft < right) right = otherRectangleLeft;
-						if (otherRectangleRight < rectanglePosition.x && otherRectangleRight > left) left = otherRectangleRight;
-					}
-				}
-			}
-			linesPositions[counter] = (right + left) / 2;
-			linesSizes[counter] = (right - left);
-			counter++;
-			linesPositions[counter] = position.y;
-			linesSizes[counter] = _LINE_THICKNESS;
-			counter++;
-			nrLines++;
 		}
 	}
+
+	std::cout << "nr lines: " << nrLines << std::endl;
 
 	animationStarted = new bool[nrLines];
 	animationStart = new double[nrLines];

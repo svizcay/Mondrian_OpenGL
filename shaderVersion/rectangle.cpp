@@ -79,7 +79,10 @@ glm::vec2 Rectangle::getRandomSize()
 glm::vec3 Rectangle::getRandomColor()
 {
 	enum class Color {RED, BLACK, BLUE, YELLOW};
-	Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	static int counter = 0;
+	Color randomColor = static_cast<Color>(counter);
+	// Color randomColor = static_cast<Color>(std::rand() * 1.0 / RAND_MAX * 4);
+	counter = (++counter) % 4;
 	glm::vec3 color;
 	switch (randomColor) {
 		case Color::RED:
@@ -232,7 +235,7 @@ void Rectangle::updatePosition()
 	 */
 	previousTime = currentTime;
 	// TODO: make speed a static variable
-	double speed = 10;
+	double speed = 5;
 	double translation = speed * deltaTime;
 	if (!isTotallyPositioned) {
 		// rectangle is still moving
@@ -392,4 +395,40 @@ bool Rectangle::getIsJustPinned()
 void Rectangle::animationAlreadyStarted()
 {
 	justPinned = false;
+}
+
+bool Rectangle::checkCollision(Rectangle other)
+{
+	bool collision = false;
+
+	GLfloat leftA	= getLeft();
+	GLfloat rightA	= getRight();
+	GLfloat bottomA	= getBottom();
+	GLfloat topA	= getTop();
+
+	GLfloat leftB	= other.getLeft();
+	GLfloat rightB	= other.getRight();
+	GLfloat bottomB	= other.getBottom();
+	GLfloat topB	= other.getTop();
+
+	bool verticallyBinsideA = false;
+	bool horizontallyBinsideA = false;
+	bool verticallyAinsideB = false;
+	bool horizontallyAinsideB = false;
+
+	bool verticalCollision = false;
+	bool horizontalCollision = false;
+
+	// check for B inside A
+	if ((bottomA < topB && topB < topA) || (bottomA < bottomB && bottomB < topA)) verticallyBinsideA = true;
+	if ((leftA < leftB && leftB < rightA) || (leftA < rightB && rightB < rightA)) horizontallyBinsideA = true;
+	// check for A inside B
+	if ((bottomB < topA && topA < topB) || (bottomB < bottomA && bottomA < topB)) verticallyAinsideB = true;
+	if ((leftB < leftA && leftA < rightB) || (leftB < rightA && rightA < rightB)) horizontallyAinsideB = true;
+
+	if (verticallyBinsideA || verticallyAinsideB) verticalCollision = true;
+	if (horizontallyBinsideA || horizontallyAinsideB) horizontalCollision = true;
+	if (verticalCollision && horizontalCollision) collision = true;
+
+	return collision;
 }
