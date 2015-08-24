@@ -56,10 +56,13 @@ private:
 	// animate rectangle onClick
 	std::map<unsigned, double>onClickAnimationStart;	// key: rectangle's id; value: start time
 
-	void createLines(unsigned rectangleID, unsigned edgeID);
+	enum class Edge {LEFT, RIGHT, BOTTOM, TOP};
+
+	void createLines(unsigned rectangleID, Edge edgeID);
 	void createVerticalLine(unsigned rectangleID, glm::vec2 linePosition);
 	void createHorizontalLine(unsigned rectangleID, glm::vec2 linePosition);
 	void addLine(glm::vec2 linePosition, GLfloat inf, GLfloat sup, bool isVertical);
+
 
 };
 

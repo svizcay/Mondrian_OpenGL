@@ -327,16 +327,16 @@ void Rectangles::createHorizontalLine(unsigned rectangleIndex, glm::vec2 linePos
 }
 
 // edge id: 0 = left; 1 = right; 2 = bottom; 3 = top
-void Rectangles::createLines(unsigned rectangleIndex, unsigned edgeID)
+void Rectangles::createLines(unsigned rectangleIndex, Edge edgeID)
 {
 
 	// line's center
 	glm::vec2 linePosition = glm::vec2(0.0f, 0.0f);
 
-	if (edgeID == 0 || edgeID == 1) {
+	if (edgeID == Edge::LEFT || edgeID == Edge::RIGHT) {
 		// vertical edge
 		
-		if (edgeID == 0) {
+		if (edgeID == Edge::LEFT) {
 			// left edge
 			linePosition.x = rectangles[rectangleIndex].getLeft();
 		} else {
@@ -348,7 +348,7 @@ void Rectangles::createLines(unsigned rectangleIndex, unsigned edgeID)
 	} else {
 		// horizontal edge
 
-		if (edgeID == 2) {
+		if (edgeID == Edge::BOTTOM) {
 			// bottom edge
 			linePosition.y = rectangles[rectangleIndex].getBottom();
 		} else {
@@ -389,10 +389,11 @@ void Rectangles::finish()
 		if (rectangles[i].getIsPinned()) {
 
 			// create edges (0:left, 1:right, 2:bottom, 3:top)
-			createLines(i, 0);
-			createLines(i, 1);
-			createLines(i, 2);
-			createLines(i, 3);
+
+			createLines(i, Edge::LEFT);
+			createLines(i, Edge::RIGHT);
+			createLines(i, Edge::BOTTOM);
+			createLines(i, Edge::TOP);
 
 		}
 	}
