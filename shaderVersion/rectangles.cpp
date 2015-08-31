@@ -174,6 +174,26 @@ void Rectangles::getSizes(GLfloat *sizes)
 	}
 }
 
+void Rectangles::getIsPinned(GLint *isPinned)
+{
+	unsigned counter = 0;
+
+	// if ended add lines
+	if (ended) {
+		for (unsigned i = 0; i < nrLines; i++) {
+			isPinned[counter++] = static_cast<GLint>(PinnedStatus::NOT_RECTANGLE);
+		}
+	}
+
+	for(unsigned i = 0; i < rectangles.size(); i++) {
+		if (rectangles[i].getIsPinned()) {
+			isPinned[counter++] = static_cast<GLint>(PinnedStatus::PINNED);
+		} else {
+			isPinned[counter++] = static_cast<GLint>(PinnedStatus::NOT_PINNED);
+		}
+	}
+}
+
 int Rectangles::size()
 {
 	return rectangles.size();

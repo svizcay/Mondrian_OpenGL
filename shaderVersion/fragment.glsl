@@ -2,7 +2,7 @@
 
 #define MAX_NR_RECTANGLES 100
 #define INVALID_POSITION 100
-#define MAX_SIMULATION_TIME 5
+#define MAX_SIMULATION_TIME 15
 #define MAX_TIME_TRANSITION_FINISH_GAME 2;
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
@@ -13,9 +13,12 @@ out vec4 color;
 uniform vec2 positions[MAX_NR_RECTANGLES];
 uniform vec2 sizes[MAX_NR_RECTANGLES];
 uniform vec3 colors[MAX_NR_RECTANGLES];
+uniform int isPinned[MAX_NR_RECTANGLES];
 uniform vec2 windowSize;
 
 uniform vec2 timers;
+
+uniform sampler2D tex;
 
 // /*
 //    gl_FragCoord location of the fragment in window's space
@@ -33,6 +36,8 @@ void main()
 	bool isValidCol;
 
 	int validID = -1;
+
+	vec2 texCoord = vec2(0.5, 0.5);
 
 	for (int i = 0; i < MAX_NR_RECTANGLES; i++) {
 
@@ -83,17 +88,33 @@ void main()
 
 		if (isValidRow && isValidCol) {
 			validID = i;
+			texCoord.x = (gl_FragCoord.x - vertexA.x) / (vertexB.x - vertexA.x);
+			texCoord.y = 1 - (gl_FragCoord.y - vertexA.y) / (vertexC.y - vertexA.y);
 			break;
 		}
 	}
 
+	float deltaTime = timers.y - timers.x;		// current time - start time
+
 	if (validID != -1) {
 		// color = vec4(colors[validID].rgb, 1);
 		// color = vec4(colors[validID].r, colors[validID].g, colors[validID].b, 1);
-		color = vec4(colors[validID], 1);
+		// color = vec4(1, 1, 1, 1) * vec4(colors[validID], 1);
+		if (deltaTime > MAX_SIMULATION_TIME) {
+			color = vec4(colors[validID], 1);
+		} else {
+			if (isPinned[validID] == 1) {
+				if (colors[validID] == vec3(0, 0, 0)) {
+					color = texture(tex, texCoord) * vec4(1, 1, 1, 1);
+				} else {
+					color = texture(tex, texCoord) * vec4(colors[validID], 1);
+				}
+			} else {
+				color = texture(tex, texCoord) * vec4(0.3, 0.3, 0.3, 1);
+			}
+		}
 	} else {
 		// background color
-		float deltaTime = timers.y - timers.x;		// current time - start time
 		if (deltaTime > MAX_SIMULATION_TIME) {
 			float gray = (deltaTime - MAX_SIMULATION_TIME) / MAX_TIME_TRANSITION_FINISH_GAME;
 			if (gray > 1) gray = 1;

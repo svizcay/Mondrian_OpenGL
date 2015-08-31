@@ -22,6 +22,7 @@ public:
 	void getPositions(GLfloat *positions);
 	void getColors(GLfloat *colors);
 	void getSizes(GLfloat *sizes);
+	void getIsPinned(GLint *isPinned);
 	int size();
 	void finish();
 	void checkPinned(double worldx, double worldy);
@@ -57,6 +58,7 @@ private:
 	std::map<unsigned, double>onClickAnimationStart;	// key: rectangle's id; value: start time
 
 	enum class Edge {LEFT, RIGHT, BOTTOM, TOP};
+	enum class PinnedStatus {NOT_PINNED, PINNED, NOT_RECTANGLE};
 
 	void createLines(unsigned rectangleID, Edge edgeID);
 	void createVerticalLine(unsigned rectangleID, glm::vec2 linePosition);

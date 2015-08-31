@@ -11,6 +11,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// Include SOIL: Simple OpenGL Image Library
+#include <SOIL/SOIL.h>
+
 #include <common/shader.hpp>
 #include <common/controls.hpp>
 
@@ -63,6 +66,7 @@ int main( void )
 	GLfloat sizes[MAX_NR_RECTANGLES * 2];
 	// MAX_NR_RECTANGLES colors (r,g,b)
 	GLfloat colors[MAX_NR_RECTANGLES * 3];
+	GLint isPinned[MAX_NR_RECTANGLES];
 	GLfloat timers[2];
 	timers[0] = glfwGetTime();
 
@@ -138,10 +142,36 @@ int main( void )
 	);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(basicQuad), basicQuad, GL_STATIC_DRAW);
 
+	// texture
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// TODO add mipmaps
+
+	int textureWidth, textureHeight;
+	unsigned char *textureData = SOIL_load_image("texture.png", &textureWidth, &textureHeight, 0, SOIL_LOAD_RGB);
+	glTexImage2D(
+			GL_TEXTURE_2D,
+			0,								// level of detail (when usin mipmaps)
+			GL_RGB,							// internal pixel format (how it should be store in the graphic card)
+			textureWidth, textureHeight,
+			0,								// ALWAYS ZERO (border)
+			GL_RGB,							// format of the incomming data
+			GL_UNSIGNED_BYTE,				// format of the incomming data
+			textureData
+	);
+	SOIL_free_image_data(textureData);
+
+	// Uniform location
 	GLuint windowSizeLoc	= glGetUniformLocation(shaderProgram, "windowSize");
 	GLuint positionsLoc		= glGetUniformLocation(shaderProgram, "positions");
 	GLuint sizesLoc			= glGetUniformLocation(shaderProgram, "sizes");
 	GLuint colorsLoc		= glGetUniformLocation(shaderProgram, "colors");
+	GLuint isPinnedLoc		= glGetUniformLocation(shaderProgram, "isPinned");
 	GLuint timersLoc		= glGetUniformLocation(shaderProgram, "timers");
 
 	unsigned simulationTime = 0;
@@ -171,6 +201,7 @@ int main( void )
 		rectangles.getPositions(positions);
 		rectangles.getSizes(sizes);
 		rectangles.getColors(colors);
+		rectangles.getIsPinned(isPinned);
 		timers[1] = glfwGetTime();
 
 		// transfer data to uniforms
@@ -178,6 +209,7 @@ int main( void )
 		glUniform2fv(positionsLoc, MAX_NR_RECTANGLES, positions);
 		glUniform2fv(sizesLoc, MAX_NR_RECTANGLES, sizes);
 		glUniform3fv(colorsLoc, MAX_NR_RECTANGLES, colors);
+		glUniform1iv(isPinnedLoc, MAX_NR_RECTANGLES, isPinned);
 		glUniform2f(timersLoc, timers[0], timers[1]);
 
 		// draw rectangles
