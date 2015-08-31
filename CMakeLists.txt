@@ -97,7 +97,7 @@ add_executable(shaderVersion
 )
 #set_target_properties(tutorial03_matrices PROPERTIES RUNTIME_OUTPUT_DIRECTORY /test1)
 target_link_libraries(shaderVersion
-	${ALL_LIBS}
+	${ALL_LIBS} SOIL
 )
 # Xcode and Visual working directories
 set_target_properties(shaderVersion PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaderVersion/")
