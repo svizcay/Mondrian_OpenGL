@@ -63,7 +63,8 @@ int main( void )
 	GLfloat sizes[MAX_NR_RECTANGLES * 2];
 	// MAX_NR_RECTANGLES colors (r,g,b)
 	GLfloat colors[MAX_NR_RECTANGLES * 3];
-
+	GLfloat timers[2];
+	timers[0] = glfwGetTime();
 
 	// windows size
 	int windowWidth = 600;
@@ -99,16 +100,16 @@ int main( void )
 	}
 
 	// enable z-buffer
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	// glEnable(GL_DEPTH_TEST);
+	// glDepthFunc(GL_LESS);
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-	// white background
-	glm::vec4 whiteColor (1.0f, 1.0f, 1.0f, 0.0f);
-	glClearColor(whiteColor.r, whiteColor.g, whiteColor.b, whiteColor.a);
+	// black background
+	glm::vec4 blackColor (0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(blackColor.r, blackColor.g, blackColor.b, blackColor.a);
 
 	// Create and compile our GLSL program from the shaders
 	GLuint shaderProgram = LoadShaders("vertex.glsl", "fragment.glsl");
@@ -141,6 +142,7 @@ int main( void )
 	GLuint positionsLoc		= glGetUniformLocation(shaderProgram, "positions");
 	GLuint sizesLoc			= glGetUniformLocation(shaderProgram, "sizes");
 	GLuint colorsLoc		= glGetUniformLocation(shaderProgram, "colors");
+	GLuint timersLoc		= glGetUniformLocation(shaderProgram, "timers");
 
 	unsigned simulationTime = 0;
 	bool justEnded = true;
@@ -151,14 +153,14 @@ int main( void )
 		updateFPSCounter(window);
 
 		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		// update viewport
 		glfwGetWindowSize(window, &windowWidth, &windowHeight);
 		glViewport(0, 0, windowWidth, windowHeight);	// (x,y) offset from lower left; (width, height)
 
 		// every 75 steps, create a new rectangle
-		if (simulationTime % 4000 == 0 && !endSimulation) {
+		if (simulationTime % 75 == 0 && !endSimulation) {
 			rectangles.createOne();
 		}
 
@@ -169,12 +171,14 @@ int main( void )
 		rectangles.getPositions(positions);
 		rectangles.getSizes(sizes);
 		rectangles.getColors(colors);
+		timers[1] = glfwGetTime();
 
 		// transfer data to uniforms
 		glUniform2f(windowSizeLoc, windowWidth, windowHeight);
 		glUniform2fv(positionsLoc, MAX_NR_RECTANGLES, positions);
 		glUniform2fv(sizesLoc, MAX_NR_RECTANGLES, sizes);
 		glUniform3fv(colorsLoc, MAX_NR_RECTANGLES, colors);
+		glUniform2f(timersLoc, timers[0], timers[1]);
 
 		// draw rectangles
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); // 3 indices starting at 0 -> 1 triangle

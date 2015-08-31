@@ -2,6 +2,8 @@
 
 #define MAX_NR_RECTANGLES 100
 #define INVALID_POSITION 100
+#define MAX_SIMULATION_TIME 5
+#define MAX_TIME_TRANSITION_FINISH_GAME 2;
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
@@ -12,6 +14,8 @@ uniform vec2 positions[MAX_NR_RECTANGLES];
 uniform vec2 sizes[MAX_NR_RECTANGLES];
 uniform vec3 colors[MAX_NR_RECTANGLES];
 uniform vec2 windowSize;
+
+uniform vec2 timers;
 
 // /*
 //    gl_FragCoord location of the fragment in window's space
@@ -35,7 +39,6 @@ void main()
 		// check if it's a valid position, ie: rectangle is alive
 		// 100 = invalid position
 		if (positions[i].x == INVALID_POSITION || positions[i].y == INVALID_POSITION) {
-			color = vec4(0.5, 0.5, 0.5, 1);
 			break;
 		}
 
@@ -89,6 +92,14 @@ void main()
 		// color = vec4(colors[validID].r, colors[validID].g, colors[validID].b, 1);
 		color = vec4(colors[validID], 1);
 	} else {
-		color = vec4(1, 1, 1, 1);
+		// background color
+		float deltaTime = timers.y - timers.x;		// current time - start time
+		if (deltaTime > MAX_SIMULATION_TIME) {
+			float gray = (deltaTime - MAX_SIMULATION_TIME) / MAX_TIME_TRANSITION_FINISH_GAME;
+			if (gray > 1) gray = 1;
+			color = vec4(gray, gray, gray, 1);
+		} else {
+			color = vec4(0, 0, 0, 1);
+		}
 	}
 }
